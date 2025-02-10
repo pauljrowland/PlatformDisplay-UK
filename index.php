@@ -68,6 +68,30 @@
                 $arrived = $s_service->locationDetail->realtimeArrivalActual ?? false; //Has it arived?
                 $origins = $s_service->locationDetail->origin ?? "Origin Unknown"; //All origins
                 $origin = $origins[0]->description ?? "Origin unkown"; //Where is it from?
+
+                $schedDate = date("Y-m-d"); //Get today's date
+                $schedDate = "$schedDate-$sched"; //Add on the scheduled time
+                $schedDateObj = DateTime::createFromFormat('Y-m-d-Hi', $schedDate); //Convert to object
+
+                $expDate = date("Y-m-d"); //Get today's date
+                $expDate = "$expDate-$expect"; //Add on the expected time
+                $expDateObj = DateTime::createFromFormat('Y-m-d-Hi', $expDate); //Convert to object
+
+                $nowDate = date("Y-m-d-Hi"); //Get date and time now;
+                $nowDateObj = DateTime::createFromFormat('Y-m-d-Hi', $nowDate); //Convert to object
+
+                $deviation = date_diff($schedDateObj,$expDateObj); //Work out the difference
+                $delay = $deviation->format('%i');
+
+                $interval = date_diff($expDateObj,$nowDateObj); //Work out the difference
+                $due = $interval->format('%i');
+
+                if ($delay > 0) {$delayed = true;}
+                else {$delayed = false;}
+
+                if ($due == 0) {$due = "Due";}
+                elseif ($arrived == true) {$due = "At Platform";}
+                else {$due = "$due min";}
                 
                 if ($operatorCode == "LD") {$operator = "Lumo";} //Lumo shows on RTT as unknown, fix this.
 
@@ -75,30 +99,6 @@
                 
                 elseif ($index == 1 AND $s_service->serviceType == "train") { //We only care about trains, not rail replacement buses or ferries. Get the next train.
                     
-
-                    $schedDate = date("Y-m-d"); //Get today's date
-                    $schedDate = "$schedDate-$sched"; //Add on the scheduled time
-                    $schedDateObj = DateTime::createFromFormat('Y-m-d-Hi', $schedDate); //Convert to object
-
-                    $expDate = date("Y-m-d"); //Get today's date
-                    $expDate = "$expDate-$expect"; //Add on the expected time
-                    $expDateObj = DateTime::createFromFormat('Y-m-d-Hi', $expDate); //Convert to object
-
-                    $nowDate = date("Y-m-d-Hi"); //Get date and time now;
-                    $nowDateObj = DateTime::createFromFormat('Y-m-d-Hi', $nowDate); //Convert to object
-
-                    $deviation = date_diff($schedDateObj,$expDateObj); //Work out the difference
-                    $delay = $deviation->format('%i');
-
-                    if ($delay > 0) {$delayed = true;}
-                    else {$delayed = false;}
-
-                    $interval = date_diff($expDateObj,$nowDateObj); //Work out the difference
-                    $due = $interval->format('%i');
-
-                    if ($due == 0) {$due = "Due";}
-                    elseif ($arrived == true) {$due = "At Platform";}
-                    else {$due = "$due min";}
 
 ?>
                     <script>
@@ -161,7 +161,7 @@
                 
                 }
 
-                elseif  ($s_service->serviceType == "train") { //We still only care about trains, not rail replacement buses or ferries. Get the rest of the trains.
+                elseif  ($s_service->serviceType == "train" && $index <=5 ) { //We still only care about the next 5 trains, not rail replacement buses or ferries. Get the rest of the trains.
                     
                     $debug_next .= "Identity: $trainIdentity<br>
                     Destination: $destination<br>
@@ -169,13 +169,23 @@
                     Scheduled: $sched<br>
                     Expected: $expect<br>
                     Platform: $platform<br>
+                    ServiceType: $s_service->serviceType<br>
+                    IterationIndex: $index<br>
                     <br><br>";
 
-                    $nextTrainStringText = "No:$index     $schedDisplay     P$platform     $destination";
+                    $nextTrainNumbers = array(null, null, "2nd","3rd","4th","5th","6th","7th","8th","9th","10th"); //Display numbers for next trains (0 and 1 are the first 2 indexes, so null them)
+
+                    if ($delayed == true) {
+                        $nextTrainStringText = "<table id=\"nextTrainsTable\"><tr><td>$nextTrainNumbers[$index]&#9;$schedDisplay&#9;P$platform&#9;$destination</td><td id=\"nextTrainsTableDueLate\">$due</td></tr></table>";
+                    }
+                    else {
+                        $nextTrainStringText = "<table id=\"nextTrainsTable\"><tr><td>$nextTrainNumbers[$index]&#9;$schedDisplay&#9;P$platform&#9;$destination</td><td id=\"nextTrainsTableDueOnTime\">$due</td></tr></table>";
+                    }
+
                     if ($nextTrainString = false) {
                         $nextTrainStrings = array($nextTrainStringText);
                     }       
-                    elseif ($index < 3) {
+                    else {
                         $nextTrainStrings[] = $nextTrainStringText;
                     }
                 }
@@ -250,7 +260,7 @@
         while (currentTime + miliseconds >= new Date().getTime()) {
             }
         }
-        timeout = 5; //Seconds to display each message
+        timeout = 1000; //1000 Is about 5 seconds
         m1 = 0;
         m2 = 0;
         m3 = 0;
@@ -299,7 +309,6 @@
             else if (++m$m < timeout) {
                 document.getElementById('boardBottomText').style.textAlign = 'left';
                 document.getElementById('bottomRow').innerHTML = '$nextTrainString';
-
             }
                 ";
 
@@ -316,7 +325,7 @@
                 m7 = 0;
                 m8 = 0;
             }
-        }, 1000);
+        }, 1);
     
     </script>
                         <div class='board-bottom'>
@@ -357,7 +366,7 @@
     echo $debug_next;
 
     echo "<br><br>JSON Dump<br><br>";
-    //echo json_encode($json, JSON_PRETTY_PRINT);
+    echo json_encode($json, JSON_PRETTY_PRINT);
  
 ?>
 
