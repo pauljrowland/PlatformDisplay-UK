@@ -18,7 +18,12 @@
 
     $debug_next = null; //!!!!!------Used for listing additional stations in the debug log
 
-    $station = $_GET['station']; // Get station code from address bar
+    if(!isset($_GET['station'] ) || $_GET['station'] == null || $_GET['station'] == '') {
+        $station = "KGX";
+    }
+    else {
+        $station = $_GET['station'];
+    }
 
     if(!isset($_GET['platform'] ) || $_GET['platform'] == null || $_GET['platform'] == 'all') {
         $platform = "all";
