@@ -8,16 +8,17 @@
     refresh( 60 ); 
     
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <title>Paul's Train Board</title>
-    <link rel="stylesheet" href="/assets/style.css"/>
+    <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
 
 
 
-<a href="?station=ncl">NCL</a> - <a href="?station=kgx">KGX</a> - <a href="?station=asl">ASL</a> - <a href="?station=nwh">NWH</a> - <a href="?station=car">CAR</a> - <a href="?station=sun">SUN</a> - <a href="?station=nlw">NLW</a> - <a href="?station=zzz">ZZZ</a></br /><br />
+<a href="?station=ncl">NCL</a> - <a href="?station=kgx">KGX</a> - <a href="?station=asl">ASL</a> - <a href="?station=nwh">NWH</a> - <a href="?station=car">CAR</a> - <a href="?station=sun">SUN</a> - <a href="?station=nlw">NLW</a> - <a href="?station=zzz">ZZZ</a><br><br>
 
 <?php
 
@@ -116,7 +117,6 @@
                     ?>
                     <div id='displayBoardWrapper'>
                         <div class='board-top'>
-                            <p>
                                 <table>
                                     <tr>
                                         <td id='nextTrainTime'><?php echo $schedDisplay;?></td>
@@ -125,10 +125,8 @@
                                         <td id='nextTrainExpected'<?php if ($delayed == true) {echo " style='color:red;' class='blink_me'>";} else {echo ">";}; echo $due;?></td>
                                     </tr>
                                 </table>
-                            </p>
                         </div>
                         <div class='board-middle'>
-                            <p>
                                 <table>
                                     <tr>
                                         <td id='callingAtLabel'>Info:</td>
@@ -146,7 +144,6 @@
                                         </td>
                                     </tr>
                                 </table>
-                            </p>
                         </div>
 
                     <?php
@@ -155,13 +152,13 @@
 
                 elseif  ($s_service->serviceType == "train") { //We still only care about trains, not rail replacement buses or ferries. Get the rest of the trains.
                     
-                    $debug_next .= "Identity: $trainIdentity<br />
-                        Destination: $destination<br />
-                        Operator: $operator<br />
-                        Scheduled: $sched<br />
-                        Expected: $sched<br />
-                        Platform: $platform<br />
-                        <br /><br />";
+                    $debug_next .= "Identity: $trainIdentity<br>
+                        Destination: $destination<br>
+                        Operator: $operator<br>
+                        Scheduled: $sched<br>
+                        Expected: $sched<br>
+                        Platform: $platform<br>
+                        <br><br>";
                 
                 }
 
@@ -182,7 +179,6 @@
 
             ?>
             <div class='board-top'>
-                <p>
                     <table>
                         <tr>
                             <td id="noNextTrainTitle">
@@ -190,16 +186,13 @@
                             </td>
                         </tr>
                     </table>
-                </p>
             </div>
             <div class='board-middle'>
-                            <p>
                                 <table>
                                     <tr>
                                         <td id='callingAtText'><div class='scroll-left-text'>There are no services stopping at this station</div></td>
                                     </tr>
                                 </table>
-                            </p>
                         </div>
             <?php
         }
@@ -212,7 +205,7 @@
 
 ?>
 
-    <script type="text/javascript" charset="utf-8">
+    <script>
 
     function sleep(miliseconds) {
                     var currentTime = new Date().getTime();
@@ -260,13 +253,10 @@
     
         }, 1000);
     
-    
-    
     </script>
 
 <div class='board-bottom'>
 
-<p>
     <table>
             <tr>
                 <td id="boardBottomTextRunning">
@@ -274,7 +264,6 @@
                 </td>
             </tr>
     </table>
-</p>
 </div>
 
     </div>
@@ -285,18 +274,18 @@
 
     //Dump debug crap and full JSON
 
-    print "<br /><br /><br /><br /><br /><br /><br />-----DEBUG-----<br /><br />";
-    print "Data retrieved from <a href='https://www.realtimetrains.co.uk/' target='_blank'>Realtime Trains</a> (<a href='https://api.rtt.io' target='_blank'>https://api.rtt.io</a>) at $timestamp<br /><br />";
+    print "<br><br><br><br><br><br><br>-----DEBUG-----<br><br>";
+    print "Data retrieved from <a href='https://www.realtimetrains.co.uk/' target='_blank'>Realtime Trains</a> (<a href='https://api.rtt.io' target='_blank'>https://api.rtt.io</a>) at $timestamp<br><br>";
 
-    echo "Identity: $trainIdentity<br />";
-    echo "Destination: $destination<br />";
-    echo "Operator: $operator<br />";
-    echo "Scheduled: $sched<br />";
-    echo "Expected: $expect<br />";
-    echo "Platform: $platform<br />";
-    echo "<br /><br />";
+    echo "Identity: $trainIdentity<br>";
+    echo "Destination: $destination<br>";
+    echo "Operator: $operator<br>";
+    echo "Scheduled: $sched<br>";
+    echo "Expected: $expect<br>";
+    echo "Platform: $platform<br>";
+    echo "<br><br>";
 
-    echo "Delay maybe of $delay mins<br /><br /><br />";
+    echo "Delay maybe of $delay mins<br><br><br>";
 
 
     echo $expDate;
@@ -307,7 +296,7 @@
 
     echo $debug_next;
 
-    echo "<br /><br />";
+    echo "<br><br>";
     echo json_encode($json, JSON_PRETTY_PRINT);
  
 ?>
