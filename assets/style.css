@@ -1,0 +1,244 @@
+@font-face {
+    font-family: "Dot-Matrix";
+    src: url(dotmatrix.ttf);
+}
+
+
+#displayBoardWrapper {
+    display: block;
+    width:80%;
+    height:260px;
+    min-width:1200px;
+    background-color: silver;
+    padding-top: 20px;
+    margin: auto;
+}
+
+#displayBoardWrapper table {
+
+    font-family:'Dot-Matrix' !important;
+
+}
+
+.board-top {
+    height: 80px;
+    width:98%;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+    background: black;
+    color: orange;
+    text-align: center;
+   }
+   .board-top p {
+    width: 98%;
+    height: 100px;
+    margin: 0;
+    line-height: 50px;
+
+   }
+
+   .board-top table {
+    width: 100%;
+    height: 100%;
+    margin-left:1%;
+   }
+
+   .board-top td {
+    font-size:50px;
+   }
+
+   #nextTrainTime {
+    min-width:110px;
+    width:5%;
+    margin: 0;
+    text-align: left;
+    color:#f01c5c;
+   }
+
+   #platformLabel{
+    color:white;
+   }
+   #nextTrainPlatform {
+        min-width: 100px;
+    width:8%;
+    text-align: center;
+    color:lightgray;
+
+
+   }
+   #nextTrainDest{
+
+    text-align: left;
+    color:#f2ad19;
+
+   }
+   #nextTrainExpected{
+  width:275px;
+    text-align: right;
+    color:green;
+
+   }
+
+   
+
+   .blink_me {
+    animation: blinker 1s linear infinite;
+  }
+  
+  @keyframes blinker {
+    50% {
+      opacity: 0;
+    }
+  }
+
+
+.board-middle {
+    height: 80px;
+    width:98%;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+    background: black;
+    color: orange;
+   }
+   .board-middle p {
+    
+    width: 100%;
+    height: 100%;
+
+    margin: 0;
+    line-height: 50px;
+    text-align: center;
+   }
+
+   .board-middle table {
+    height: 100%;
+    margin: 0;
+   }
+
+   .board-middle td {
+    display: table-cell;
+    vertical-align: middle;
+   }
+
+   #callingAtLabel{
+    
+    font-size:40px;
+    width: 250px;
+    text-align: left;
+    color:#ff0000;
+   }
+
+   #callingAtText{
+    color:#ffc000;
+    height: 95%;
+   }
+
+
+
+
+/* Container styles */
+.scrolling-text-container {
+    overflow: hidden;
+    color:#ffc000;
+    vertical-align: middle;
+    border-left: 10px solid black;
+    margin-right:20%
+}
+
+/* Inner container styles */
+.scrolling-text-inner {
+    white-space: nowrap;
+    font-size:40px;
+}
+
+/* Text styles */
+.scrolling-text {
+    display: inline-flex;
+
+}
+
+.scrolling-text-item {
+    padding: 0 30px;
+}
+
+/* Apply the animation to the text items */
+.scrolling-text-inner>div {
+    animation: var(--direction) var(--marquee-speed) linear infinite;
+
+}
+
+
+/* Setting the Animation using Keyframes */
+@keyframes scroll-left {
+    0% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes scroll-right {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(0%);
+    }
+}
+
+   .board-bottom {
+    height: 80px;
+    width:98%;
+    margin-left: auto;
+    margin-right: auto;
+    overflow: hidden;
+    background: black;
+    color: orange;
+
+   }
+   .board-bottom p {
+    
+    width:100%;
+    height: 100%;
+    line-height: 50px;
+    text-align: center;
+
+
+   }
+
+   .board-bottom table {
+width:98%;
+   }
+
+   .board-bottom td {
+    font-size:50px;
+
+   }
+
+   #boardBottomTextRunning{
+    width:100%;
+    text-align: center;
+    color:lightblue;
+
+   }
+
+   #noNextTrainTitle{
+    
+    width:100%;
+    text-align: center;
+    color:#f2ad19;
+
+   }
+
+   #noNextTrainBottom{
+    
+    width:100%;
+    text-align: center;
+    color:lightblue;
+
+   }
