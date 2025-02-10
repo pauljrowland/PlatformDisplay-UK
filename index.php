@@ -348,7 +348,7 @@
 <?php
 
     echo "</div> <!-- End displayBoardInnerWrapper DIV -->";
-    echo "<div class='bottomOfScreenText'>StationBoard - Paul Rowland - <a href='https://github.com/pauljrowland/StationDisplays' target='_blank'>Github</a></div";
+    echo "<div class='bottomOfScreenText'>StationBoard - Paul Rowland - <a href='https://github.com/pauljrowland/StationBoard' target='_blank'>Github</a></div";
     echo "</div> <!-- End displayBoardWrapper DIV -->";
 
     //Dump debug crap and full JSON
