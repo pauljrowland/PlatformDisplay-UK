@@ -229,7 +229,13 @@
                                 </tr>
                             </table>
                        </div>
+                       
 
+<?php
+
+        }
+
+?>
 <script>
 
     function sleep(miliseconds) {
@@ -287,8 +293,6 @@
                     
 
 <?php
-
-    }
 
     echo "</div> <!-- End displayBoardInnerWrapper DIV -->";
     echo "</div> <!-- End displayBoardWrapper DIV -->";
