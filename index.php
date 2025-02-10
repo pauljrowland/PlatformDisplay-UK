@@ -104,14 +104,14 @@
                 $nowDate = date("Y-m-d-Hi"); //Get date and time now;
                 $nowDateObj = DateTime::createFromFormat('Y-m-d-Hi', $nowDate); //Convert to object
 
-                $deviation = date_diff($schedDateObj,$expDateObj); //Work out the difference
-                $delay = $deviation->format('%i');
-
-                $interval = date_diff($expDateObj,$nowDateObj); //Work out the difference
-                $due = $interval->format('%i');
-
-                if ($delay > 0) {$delayed = true;}
-                else {$delayed = false;}
+                if ($expDateObj == true) { //There is an expected time - let's work out if it's delayed ot not.
+                    $deviation = date_diff($schedDateObj,$expDateObj); //Work out the difference
+                    $delay = $deviation->format('%i');
+                    $interval = date_diff($expDateObj,$nowDateObj); //Work out the difference
+                    $due = $interval->format('%i');
+                    if ($delay > 0) {$delayed = true;}
+                    else {$delayed = false;}
+                }
 
                 if ($due == 0) {$due = "Due";}
                 elseif ($arrived == true) {$due = "At Platform";}
