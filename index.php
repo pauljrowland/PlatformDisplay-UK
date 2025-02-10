@@ -63,6 +63,7 @@
                 $operatorCode = $s_service->atocCode ?? "Operator Code Unknown"; //Operator code, i.e. LD
                 $operator = $s_service->atocName ?? "Operator Name Unknown"; //Operator friendly name
                 $sched = $s_service->locationDetail->gbttBookedDeparture ?? "Booked Departure Unknown"; //When should it leave?
+                $schedDisplay = substr_replace($sched, ":", 2, 0);
                 $expect = $s_service->locationDetail->realtimeDeparture ?? "-"; //When is it likely to leave?
                 $arrived = $s_service->locationDetail->realtimeArrivalActual ?? false; //Has it arived?
                 $origins = $s_service->locationDetail->origin ?? "Origin Unknown"; //All origins
@@ -70,11 +71,10 @@
                 
                 if ($operatorCode == "LD") {$operator = "Lumo";} //Lumo shows on RTT as unknown, fix this.
 
-                if ($index == 1 AND $s_service->serviceType != "train") { $index = 0; } //Next train is say a bus, don't display it - so reset the index to 0, meaning the next real train shows
+                if ($index > 0 AND $s_service->serviceType != "train") { $index--; } //Next train is say a bus, don't display it - so reset the index to 0, meaning the next real train shows
                 
                 elseif ($index == 1 AND $s_service->serviceType == "train") { //We only care about trains, not rail replacement buses or ferries. Get the next train.
                     
-                    $schedDisplay = substr_replace($sched, ":", 2, 0);
 
                     $schedDate = date("Y-m-d"); //Get today's date
                     $schedDate = "$schedDate-$sched"; //Add on the scheduled time
@@ -105,16 +105,15 @@
                         var texts = new Array();
                         texts.push("<?php echo $trainIdentity; ?>");
                         texts.push("<?php echo $schedDisplay; ?>");
-                        var point = 0;
+                        point = 0;
                         function changeText(){
-                            document.getElementById('nextTrainTime').innerHTML = texts[point];
                             if(point < ( texts.length - 1 ) ){
                                 point++;
                             }else{
                                 point = 0;
                             }
+                            document.getElementById('nextTrainTime').innerHTML = texts[point];
                         }
- 
                         setInterval(changeText, 5000); /*Call it here*/
                         changeText();
 
@@ -165,13 +164,21 @@
                 elseif  ($s_service->serviceType == "train") { //We still only care about trains, not rail replacement buses or ferries. Get the rest of the trains.
                     
                     $debug_next .= "Identity: $trainIdentity<br>
-                        Destination: $destination<br>
-                        Operator: $operator<br>
-                        Scheduled: $sched<br>
-                        Expected: $expect<br>
-                        Platform: $platform<br>
-                        <br><br>";
+                    Destination: $destination<br>
+                    Operator: $operator<br>
+                    Scheduled: $sched<br>
+                    Expected: $expect<br>
+                    Platform: $platform<br>
+                    <br><br>";
+
+                    $nextTrainStringText = "No:$index     $schedDisplay     P$platform     $destination";
+                    if ($nextTrainString = false) {
+                        $nextTrainStrings = array($nextTrainStringText);
+                    }       
+                    elseif ($index < 3) {
+                        $nextTrainStrings[] = $nextTrainStringText;
                     }
+                }
 
                 else {
                     
@@ -247,11 +254,17 @@
         m1 = 0;
         m2 = 0;
         m3 = 0;
+        m4 = 0;
+        m5 = 0;
+        m6 = 0;
+        m7 = 0;
+        m8 = 0;
         let a;
         let time;
         var timeDisplay = setInterval(() => {
             if (++m1 < timeout){
                 display = "<?php echo $s_name; ?>";
+                document.getElementById('boardBottomText').style.textAlign = 'center'; 
                 document.getElementById('bottomRow').innerHTML = display;
             }
             else if (++m2 < timeout) {
@@ -265,22 +278,47 @@
                 monthName = new Date(a).toLocaleString('en-us', {month:'long'})
                 year = a.getFullYear()
                 display = dayName + ' ' + day + suffix + ' ' + monthName + ' ' + year;
+                document.getElementById('boardBottomText').style.textAlign = 'center'; 
                 document.getElementById('bottomRow').innerHTML = display;
             }
             else if (++m3 < timeout) {
                 a = new Date();
-                var time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second: '2-digit'});   
+                var time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second: '2-digit'});
+                document.getElementById('boardBottomText').style.textAlign = 'center'; 
                 document.getElementById('bottomRow').innerHTML = time;
             }
+
+            <?php
+            
+                $additionalTrains = 0;
+                foreach ($nextTrainStrings as $nextTrainString) {
+                    $additionalTrains++;
+                    $m = $additionalTrains + 3;
+
+                    echo "
+            else if (++m$m < timeout) {
+                document.getElementById('boardBottomText').style.textAlign = 'left';
+                document.getElementById('bottomRow').innerHTML = '$nextTrainString';
+
+            }
+                ";
+
+                }
+     ?>
+
             else {
                 m1 = 0;
                 m2 = 0;
-                m3 =0;
+                m3 = 0;
+                m4 = 0;
+                m5 = 0;
+                m6 = 0;
+                m7 = 0;
+                m8 = 0;
             }
         }, 1000);
     
     </script>
-
                         <div class='board-bottom'>
                             <table>
                                 <tr>
@@ -303,6 +341,10 @@
     print "Data retrieved from <a href='https://www.realtimetrains.co.uk/' target='_blank'>Realtime Trains</a> (<a href='https://api.rtt.io' target='_blank'>https://api.rtt.io</a>) at $timestamp<br><br>";
 
     echo $debug_now;
+
+    foreach ($nextTrainStrings as $nextTrainString) {
+    echo "$nextTrainString<br>";
+    }
 
     echo "Exp: $expDate<br>";
     echo "TimeNow: $nowDate<br>";
