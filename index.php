@@ -3,10 +3,7 @@
         $current_url = $_SERVER[ 'REQUEST_URI' ];
         return header( "Refresh: " . $time . "; URL=$current_url" );
     }
-
-    // call the function in the appropriate place
     refresh( 60 ); 
-    
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,8 +12,6 @@
     <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
-
-
 
 <a href="?station=ncl">NCL</a> - <a href="?station=kgx">KGX</a> - <a href="?station=asl">ASL</a> - <a href="?station=nwh">NWH</a> - <a href="?station=car">CAR</a> - <a href="?station=sun">SUN</a> - <a href="?station=nlw">NLW</a> - <a href="?station=zzz">ZZZ</a><br><br>
 
@@ -87,7 +82,6 @@
                 
                 elseif ($index == 1 AND $s_service->serviceType == "train") { //We only care about trains, not rail replacement buses or ferries. Get the next train.
                     
-
                     $schedDisplay = substr_replace($sched, ":", 2, 0);
 
                     $schedDate = date("Y-m-d"); //Get today's date
@@ -114,7 +108,8 @@
                     elseif ($arrived == true) {$due = "At Platform";}
                     else {$due = "$due min";}
 
-                    ?>
+?>
+
                     <div id='displayBoardWrapper'>
                         <div class='board-top'>
                                 <table>
@@ -146,7 +141,7 @@
                                 </table>
                         </div>
 
-                    <?php
+ <?php
                 
                 }
 
@@ -159,8 +154,7 @@
                         Expected: $sched<br>
                         Platform: $platform<br>
                         <br><br>";
-                
-                }
+                    }
 
                 else {
                     
@@ -169,50 +163,47 @@
                 }
             
             }
-            ?>
+ ?>
 
-        <?php
+            <?php
         
         }
 
         else { //($s_services == false) { //There are no services, or there are only non-train services.
 
-            ?>
-            <div class='board-top'>
-                    <table>
-                        <tr>
-                            <td id="noNextTrainTitle">
-                                <?php echo $s_name; ?>
-                            </td>
-                        </tr>
-                    </table>
-            </div>
-            <div class='board-middle'>
-                                <table>
-                                    <tr>
-                                        <td id='callingAtText'><div class='scroll-left-text'>There are no services stopping at this station</div></td>
-                                    </tr>
-                                </table>
+?>
+                        <div class='board-top'>
+                            <table>
+                                <tr>
+                                    <td id="noNextTrainTitle">
+                                        <?php echo $s_name; ?>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
-            <?php
+                        <div class='board-middle'>
+                            <table>
+                                <tr>
+                                    <td id='callingAtText'><div class='scroll-left-text'>There are no services stopping at this station</div></td>
+                                </tr>
+                            </table>
+                       </div>
+<?php
         }
-
 
     }
 
     if ($invalid_s_code == false) {
 
-
 ?>
 
-    <script>
+<script>
 
     function sleep(miliseconds) {
-                    var currentTime = new Date().getTime();
-                    while (currentTime + miliseconds >= new Date().getTime()) {
-                    }
-                }
-        
+        var currentTime = new Date().getTime();
+        while (currentTime + miliseconds >= new Date().getTime()) {
+            }
+        }
         timeout = 5; //Seconds to display each message
         m1 = 0;
         m2 = 0;
@@ -228,12 +219,10 @@
                 a = new Date();
                 day = a.getDate();
                 dayName = new Date(a).toLocaleString('en-us', {weekday:'long'})
-
                 if (day == 1 || day == 21 || day == 31 ) {suffix = "st";}
                 else if (day == 2 || day == 22) {suffix = "nd";}
                 else if (day == 3 || day == 23) {suffix = "rd";}
                 else {suffix = "th";}
-
                 monthName = new Date(a).toLocaleString('en-us', {month:'long'})
                 year = a.getFullYear()
                 display = dayName + ' ' + day + suffix + ' ' + monthName + ' ' + year;
@@ -244,29 +233,26 @@
                 var time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second: '2-digit'});   
                 document.getElementById('bottomRow').innerHTML = time;
             }
-    
             else {
                 m1 = 0;
                 m2 = 0;
                 m3 =0;
             }
-    
         }, 1000);
     
     </script>
 
-<div class='board-bottom'>
-
-    <table>
-            <tr>
-                <td id="boardBottomTextRunning">
-                    <span id="bottomRow"></span>
-                </td>
-            </tr>
-    </table>
-</div>
-
-    </div>
+                        <div class='board-bottom'>
+                            <table>
+                                <tr>
+                                    <td id="boardBottomTextRunning">
+                                        <span id="bottomRow"></span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    
+                    </div> <!-- End dijsplayBoardWrapper DIV -->
 
 <?php
 
