@@ -45,6 +45,8 @@
     $s_code = $obj->location->crs ?? false; //Station Code
     $s_services = $obj->services ?? false; //Services
 
+    echo "          <div id='displayBoardWrapper'>";
+    echo "          <div id='displayBoardInnerWrapper'>";
 
     if ($s_code == false) { //Station code specified hasn't returned a valid reply from RTT
 
@@ -109,12 +111,29 @@
                     else {$due = "$due min";}
 
 ?>
+                    <script>
+                        var texts = new Array();
+                        texts.push("<?php echo $trainIdentity; ?>");
+                        texts.push("<?php echo $schedDisplay; ?>");
+                        var point = 0;
+                        function changeText(){
+                            document.getElementById('nextTrainTime').innerHTML = texts[point];
+                            if(point < ( texts.length - 1 ) ){
+                                point++;
+                            }else{
+                                point = 0;
+                            }
+                        }
+ 
+                        setInterval(changeText, 5000); /*Call it here*/
+                        changeText();
 
-                    <div id='displayBoardWrapper'>
+                    </script>
+
                         <div class='board-top'>
                                 <table>
                                     <tr>
-                                        <td id='nextTrainTime'><?php echo $schedDisplay;?></td>
+                                        <td id='nextTrainTime'><?php echo $schedDisplay; ?></td>
                                         <td id='nextTrainPlatform'><strong id='platformLabel'>P</strong><?php echo "$platform";?></td>
                                         <td id='nextTrainDest'><?php echo $destination;?></td>
                                         <td id='nextTrainExpected'<?php if ($delayed == true) {echo " style='color:red;' class='blink_me'>";} else {echo ">";}; echo $due;?></td>
@@ -123,7 +142,7 @@
                         </div>
                         <div class='board-middle'>
                                 <table>
-                                    <tr>
+                                    <tr id='board-middle-table-row'>
                                         <td id='callingAtLabel'>Info:</td>
                                         <td id='callingAtText'>
                                             <div class="scrolling-text-container">
@@ -140,8 +159,16 @@
                                     </tr>
                                 </table>
                         </div>
-
  <?php
+
+                    $debug_now = "Identity: $trainIdentity<br>
+                    Destination: $destination<br>
+                    Operator: $operator<br>
+                    Scheduled: $sched<br>
+                    Expected: $expect<br>
+                    Platform: $platform<br>
+                    <br><br>";
+
                 
                 }
 
@@ -151,7 +178,7 @@
                         Destination: $destination<br>
                         Operator: $operator<br>
                         Scheduled: $sched<br>
-                        Expected: $sched<br>
+                        Expected: $expect<br>
                         Platform: $platform<br>
                         <br><br>";
                     }
@@ -171,6 +198,12 @@
 
         else { //($s_services == false) { //There are no services, or there are only non-train services.
 
+            $debug_now = false;
+            $expDate = false;
+            $nowDate = false;
+            $due = false;
+            $delay = false;
+
 ?>
                         <div class='board-top'>
                             <table>
@@ -183,8 +216,18 @@
                         </div>
                         <div class='board-middle'>
                             <table>
-                                <tr>
-                                    <td id='callingAtText'><div class='scroll-left-text'>There are no services stopping at this station</div></td>
+                                <tr id='board-middle-table-row'>
+                                    <td id='callingAtText'>
+                                        <div class="scrolling-text-container">
+                                            <div class="scrolling-text-inner" style="--marquee-speed: 20s; --direction:scroll-left" role="marquee">
+                                                <div class="scrolling-text">
+                                                    <div class="scrolling-text-item" style="width:1000px;"></div> <!--Start the scroll with blank space -->
+                                                    <div class="scrolling-text-item">There are currenly no services stopping at this station.</div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
                                 </tr>
                             </table>
                        </div>
@@ -245,14 +288,15 @@
                         <div class='board-bottom'>
                             <table>
                                 <tr>
-                                    <td id="boardBottomTextRunning">
+                                    <td id="boardBottomText">
                                         <span id="bottomRow"></span>
                                     </td>
                                 </tr>
                             </table>
                         </div>
                     
-                    </div> <!-- End dijsplayBoardWrapper DIV -->
+                     </div> <!-- End displayBoardInnerWrapper DIV -->
+                    </div> <!-- End displayBoardWrapper DIV -->
 
 <?php
 
@@ -263,26 +307,19 @@
     print "<br><br><br><br><br><br><br>-----DEBUG-----<br><br>";
     print "Data retrieved from <a href='https://www.realtimetrains.co.uk/' target='_blank'>Realtime Trains</a> (<a href='https://api.rtt.io' target='_blank'>https://api.rtt.io</a>) at $timestamp<br><br>";
 
-    echo "Identity: $trainIdentity<br>";
-    echo "Destination: $destination<br>";
-    echo "Operator: $operator<br>";
-    echo "Scheduled: $sched<br>";
-    echo "Expected: $expect<br>";
-    echo "Platform: $platform<br>";
-    echo "<br><br>";
+    echo $debug_now;
 
-    echo "Delay maybe of $delay mins<br><br><br>";
+    echo "Exp: $expDate<br>";
+    echo "TimeNow: $nowDate<br>";
+    echo "DueIn: $due<br>";
+    echo "Delay maybe of $delay mins";
 
+    echo "<br><br><br>";
 
-    echo $expDate;
-    echo "&nbsp;&nbsp;&nbsp;";
-    echo $nowDate;
-    echo "&nbsp;&nbsp;&nbsp;";
-    echo $due;
-
+    echo "Next Trains:<br><br>";
     echo $debug_next;
 
-    echo "<br><br>";
+    echo "<br><br>JSON Dump<br><br>";
     echo json_encode($json, JSON_PRETTY_PRINT);
  
 ?>
