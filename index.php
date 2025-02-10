@@ -13,7 +13,8 @@
 </head>
 <body>
 
-<a href="?station=ncl">NCL</a> - <a href="?station=kgx">KGX</a> - <a href="?station=asl">ASL</a> - <a href="?station=nwh">NWH</a> - <a href="?station=car">CAR</a> - <a href="?station=sun">SUN</a> - <a href="?station=nlw">NLW</a> - <a href="?station=zzz">ZZZ</a><br><br>
+<a href="?station=ncl">NCL</a> - <a href="?station=kgx">KGX</a> - <a href="?station=asl">ASL</a> - <a href="?station=nwh">NWH</a> - <a href="?station=car">CAR</a> - <a href="?station=sun">SUN</a> - <a href="?station=nlw">NLW</a> - <a href="?station=zzz">ZZZ</a><br>
+<form action=".">Manual Station Code:<input name="station" id="station" type="text"><input type="Submit"></form><br><br><br>
 
 <?php
 
@@ -47,17 +48,6 @@
 
     echo "          <div id='displayBoardWrapper'>";
     echo "          <div id='displayBoardInnerWrapper'>";
-
-    if ($s_code == false) { //Station code specified hasn't returned a valid reply from RTT
-
-        echo "You have entered an invalid station code, please try again...";
-        $invalid_s_code = true;
-
-    }
-
-    else {
-
-        $invalid_s_code = false;
 
         if ($s_services == true) { //There are services of some sort
 
@@ -222,8 +212,16 @@
                                             <div class="scrolling-text-inner" style="--marquee-speed: 20s; --direction:scroll-left" role="marquee">
                                                 <div class="scrolling-text">
                                                     <div class="scrolling-text-item" style="width:1000px;"></div> <!--Start the scroll with blank space -->
-                                                    <div class="scrolling-text-item">There are currenly no services stopping at this station.</div>
-
+                                                    <div class="scrolling-text-item">
+<?php
+                                                    if ($s_code != false) {
+                                                        echo "There are currenly no services stopping at this station.";
+                                                    }
+                                                    else {
+                                                        echo "ERROR: Invalid Station Code '$station'";
+                                                    }
+?>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -231,14 +229,6 @@
                                 </tr>
                             </table>
                        </div>
-<?php
-        }
-
-    }
-
-    if ($invalid_s_code == false) {
-
-?>
 
 <script>
 
@@ -295,12 +285,13 @@
                             </table>
                         </div>
                     
-                     </div> <!-- End displayBoardInnerWrapper DIV -->
-                    </div> <!-- End displayBoardWrapper DIV -->
 
 <?php
 
     }
+
+    echo "</div> <!-- End displayBoardInnerWrapper DIV -->";
+    echo "</div> <!-- End displayBoardWrapper DIV -->";
 
     //Dump debug crap and full JSON
 
@@ -320,7 +311,7 @@
     echo $debug_next;
 
     echo "<br><br>JSON Dump<br><br>";
-    echo json_encode($json, JSON_PRETTY_PRINT);
+    //echo json_encode($json, JSON_PRETTY_PRINT);
  
 ?>
 
