@@ -3,6 +3,10 @@
     src: url(dotmatrix.ttf);
 }
 
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 #displayBoardWrapper {
     display: block;
     width:95%;
@@ -55,10 +59,6 @@
     margin: 0;
     text-align: left;
     color:#f01c5c;
-}
-
-#platformLabel{
-    color:white;
 }
 
 #nextTrainPlatform {
@@ -170,7 +170,7 @@
 /* Setting the Animation using Keyframes */
 @keyframes scroll-left {
     0% {
-        transform: translateX(0%);
+        transform: translateX(50%);
     }
     100% {
         transform: translateX(-100%);
@@ -232,7 +232,6 @@
 #nextTrainsTableDueLate {
     text-align: right;
     color:red;
-
 }
 
 #noNextTrainTitle{
@@ -251,7 +250,23 @@
 }
 
 div.bottomOfScreenText > * {
+    color: rgba(255,255,255,0.4);
+    text-shadow: 0 -2px  rgba(0,0,0,0.6);
+    font-size: 20px;
+}
 
+#footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: black;
+    color: white;
+    text-align: center;
+    line-height: 5px;
+  }
+
+  #footer  * {
     color: rgba(255,255,255,0.4);
     text-shadow: 0 -2px  rgba(0,0,0,0.6);
     font-size: 20px;
