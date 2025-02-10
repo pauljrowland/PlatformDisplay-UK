@@ -3,10 +3,9 @@
     src: url(dotmatrix.ttf);
 }
 
-
 #displayBoardWrapper {
     display: block;
-    width:80%;
+    width:95%;
     min-width: 750px;
     background-color: silver;
     margin: auto;
@@ -21,9 +20,7 @@
 }
 
 #displayBoardWrapper table {
-
     font-family:'Dot-Matrix' !important;
-
 }
 
 .board-top {
@@ -35,65 +32,65 @@
     background: black;
     color: orange;
     text-align: center;
-   }
-   .board-top div {
+}
+
+.board-top div {
     width: 98%;
     height: 100px;
     margin: 0;
     line-height: 50px;
+}
 
-   }
-
-   .board-top table {
+.board-top table {
     width: 100%;
     height: 100%;
-   }
+}
 
-   .board-top td {
+.board-top td {
     font-size:50px;
-   }
+}
 
-   #nextTrainTime {
-    width:5%;
+#nextTrainTime {
+    width:110px;
     margin: 0;
     text-align: left;
     color:#f01c5c;
-   }
+}
 
-   #platformLabel{
+#platformLabel{
     color:white;
-   }
-   #nextTrainPlatform {
-    width:8%;
+}
+
+#nextTrainPlatform {
+    width:80px;
     text-align: center;
     color:lightgray;
+}
 
-
-   }
-   #nextTrainDest{
-
+#nextTrainDest{
+    white-space: nowrap;
+    overflow: hidden;
     text-align: left;
     color:#f2ad19;
+}
 
-   }
-   #nextTrainExpected{
-  width:275px;
+#nextTrainExpected{
+    white-space: nowrap;
+    overflow: hidden;
+    width:275px;
     text-align: right;
     color:green;
+}
 
-   }
-
-   
-
-   .blink_me {
+.blink_me {
     animation: blinker 1s linear infinite;
   }
   
-  @keyframes blinker {
+@keyframes blinker {
     50% {
-      opacity: 0;
+        opacity: 0;
     }
-  }
+}
 
 
 .board-middle {
@@ -104,45 +101,43 @@
     overflow: hidden;
     background: black;
     color: orange;
-   }
-   .board-middle div {
-    
+}
+
+.board-middle div {
     width: 100%;
     height: 100%;
-
     margin: 0;
     line-height: 50px;
     text-align: center;
-   }
+}
 
-   .board-middle table {
+.board-middle table {
     width: 100%;
     height: 100%;
 }
 
-   #board-middle-table-row {
+#board-middle-table-row {
     height:100%;
-   }
+}
 
-   .board-middle td {
+.board-middle td {
     display: table-cell;
     vertical-align: middle;
-   }
+}
 
-   #callingAtLabel{
-    
+#callingAtLabel{
     font-size:40px;
     text-align: left;
     color:#ff0000;
     padding-left:5px;
     padding-right:25px;
-   }
+}
 
-   #callingAtText{
+#callingAtText{
     color:#ffc000;
     height: 95%;
     width:100%;
-   }
+}
 
 /* Container styles */
 .scrolling-text-container {
@@ -155,13 +150,11 @@
 .scrolling-text-inner {
     white-space: nowrap;
     font-size:40px;
-
 }
 
 /* Text styles */
 .scrolling-text {
     display:flex;
-
 }
 
 .scrolling-text-item {
@@ -172,18 +165,13 @@
 /* Apply the animation to the text items */
 .scrolling-text-inner>div {
     animation: var(--direction) var(--marquee-speed) linear infinite;
-
 }
-
-/* Apply the animation to the text items */
-
 
 /* Setting the Animation using Keyframes */
 @keyframes scroll-left {
     0% {
         transform: translateX(0%);
     }
-
     100% {
         transform: translateX(-100%);
     }
@@ -193,13 +181,12 @@
     0% {
         transform: translateX(-100%);
     }
-
     100% {
         transform: translateX(0%);
     }
 }
 
-   .board-bottom {
+.board-bottom {
     height: 80px;
     width:98%;
     margin-left: auto;
@@ -207,38 +194,34 @@
     overflow: hidden;
     background: black;
     color: orange;
+}
 
-   }
-   .board-bottom div {
-    
+.board-bottom div {    
     width:100%;
     height: 100%;
     line-height: 50px;
     text-align: center;
+}
 
-
-   }
-
-   .board-bottom table {
+.board-bottom table {
     width: 100%;
     height: 100%;
-   }
+}
 
-   .board-bottom td {
+.board-bottom td {
     font-size:50px;
+}
 
-   }
-
-   #boardBottomText{
+#boardBottomText{
     width:100%;
-text-align: center;
-
+    text-align: center;
     color:lightblue;
+}
 
-   }
-
-#nextTrainsTable {
+.nextTrainsTable {
     width:100%;
+    white-space: nowrap;
+    overflow: scroll;
 }
 
 #nextTrainsTableDueOnTime {
@@ -249,11 +232,27 @@ text-align: center;
 #nextTrainsTableDueLate {
     text-align: right;
     color:red;
+
 }
 
-   #noNextTrainTitle{
+#noNextTrainTitle{
     margin-left:auto;
     margin-right:auto;
     color:#f2ad19;
+}
 
-   }
+.bottomOfScreenText {
+    text-align: center;
+    margin-top:15px;
+    margin-bottom:auto;
+    color: rgba(255,255,255,0.4);
+    text-shadow: 0 -2px  rgba(0,0,0,0.6);
+    font-size: 20px;
+}
+
+div.bottomOfScreenText > * {
+
+    color: rgba(255,255,255,0.4);
+    text-shadow: 0 -2px  rgba(0,0,0,0.6);
+    font-size: 20px;
+}

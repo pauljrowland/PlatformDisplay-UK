@@ -13,8 +13,6 @@
 </head>
 <body>
 
-<a href="?station=ncl">NCL</a> - <a href="?station=kgx">KGX</a> - <a href="?station=asl">ASL</a> - <a href="?station=nwh">NWH</a> - <a href="?station=car">CAR</a> - <a href="?station=sun">SUN</a> - <a href="?station=nlw">NLW</a> - <a href="?station=zzz">ZZZ</a><br>
-<form action=".">Manual Station Code:<input name="station" id="station" type="text"><input type="Submit"></form><br><br><br>
 
 <?php
 
@@ -22,6 +20,25 @@
 
     $station = $_GET['station']; // Get station code from address bar
 
+    if(!isset($_GET['platform'] ) || $_GET['platform'] == null || $_GET['platform'] == 'all') {
+        $platform = "all";
+        $pltatformSet = false;
+    }
+    else {
+        $platform = $_GET['platform'];
+        $pltatformSet = true;
+    }
+
+    ?>
+
+    <a href="?station=ncl">NCL</a> - <a href="?station=kgx">KGX</a> - <a href="?station=asl">ASL</a> - <a href="?station=nwh">NWH</a> - <a href="?station=car">CAR</a> - <a href="?station=sun">SUN</a> - <a href="?station=nlw">NLW</a> - <a href="?station=zzz">ZZZ</a><br><br>
+    <form action=".">
+    Manual Station Code: <input name="station" id="station" type="text" required value="<?php echo $station;?>"><br>
+    Platform Number (leave blank for all): <input name="platform" id="platform" type="text" value="<?php echo $platform;?>">
+    <input type="Submit"></form><br>
+    </form>
+
+<?php
     // API Query
     $apiUrl = "https://api.rtt.io/api/v1/json/search/$station";
 
@@ -49,6 +66,8 @@
     echo "          <div id='displayBoardWrapper'>";
     echo "          <div id='displayBoardInnerWrapper'>";
 
+    $servicesShown = 0; //None shown yet
+
         if ($s_services == true) { //There are services of some sort
 
             $index = 0; //Set train index to 0 so first train sets to 1
@@ -59,7 +78,7 @@
                 $trainIdentity = $s_service->trainIdentity ?? "Identity Unknown"; //Train identity (head code)
                 $destinations = $s_service->locationDetail->destination ?? "Destination Unknown"; //All train calling destinations
                 $destination  = $destinations[0]->description ?? "Description Unknown"; //First destination returned is the last the train will stop at
-                $platform = $s_service->locationDetail->platform ?? "-"; //Platform number. Set to "-" if unknown or a single platform station
+                $pltfm = $s_service->locationDetail->platform ?? "-"; //Platform number. Set to "-" if unknown or a single platform station
                 $operatorCode = $s_service->atocCode ?? "Operator Code Unknown"; //Operator code, i.e. LD
                 $operator = $s_service->atocName ?? "Operator Name Unknown"; //Operator friendly name
                 $sched = $s_service->locationDetail->gbttBookedDeparture ?? "Booked Departure Unknown"; //When should it leave?
@@ -97,9 +116,11 @@
 
                 if ($index > 0 AND $s_service->serviceType != "train") { $index--; } //Next train is say a bus, don't display it - so reset the index to 0, meaning the next real train shows
                 
-                elseif ($index == 1 AND $s_service->serviceType == "train") { //We only care about trains, not rail replacement buses or ferries. Get the next train.
-                    
+                elseif ($pltatformSet == true AND $platform != $pltfm) {$index--;} //Is the train showing on the platform we selected (if not all)? If not, reset the index to 0 and try again
 
+                elseif (($index == 1 AND $s_service->serviceType == "train")) { //We only care about trains, not rail replacement buses or ferries. Get the next train.
+
+                    $servicesShown++;
 ?>
                     <script>
                         var texts = new Array();
@@ -123,7 +144,7 @@
                                 <table>
                                     <tr>
                                         <td id='nextTrainTime'><?php echo $schedDisplay; ?></td>
-                                        <td id='nextTrainPlatform'><strong id='platformLabel'>P</strong><?php echo "$platform";?></td>
+                                        <td id='nextTrainPlatform'><strong id='platformLabel'>P</strong><?php echo "$pltfm";?></td>
                                         <td id='nextTrainDest'><?php echo $destination;?></td>
                                         <td id='nextTrainExpected'<?php if ($delayed == true) {echo " style='color:red;' class='blink_me'>";} else {echo ">";}; echo $due;?></td>
                                     </tr>
@@ -149,37 +170,20 @@
                                 </table>
                         </div>
  <?php
-
-                    $debug_now = "Identity: $trainIdentity<br>
-                    Destination: $destination<br>
-                    Operator: $operator<br>
-                    Scheduled: $sched<br>
-                    Expected: $expect<br>
-                    Platform: $platform<br>
-                    <br><br>";
-
                 
                 }
 
                 elseif  ($s_service->serviceType == "train" && $index <=5 ) { //We still only care about the next 5 trains, not rail replacement buses or ferries. Get the rest of the trains.
                     
-                    $debug_next .= "Identity: $trainIdentity<br>
-                    Destination: $destination<br>
-                    Operator: $operator<br>
-                    Scheduled: $sched<br>
-                    Expected: $expect<br>
-                    Platform: $platform<br>
-                    ServiceType: $s_service->serviceType<br>
-                    IterationIndex: $index<br>
-                    <br><br>";
+                    $servicesShown++;
 
                     $nextTrainNumbers = array(null, null, "2nd","3rd","4th","5th","6th","7th","8th","9th","10th"); //Display numbers for next trains (0 and 1 are the first 2 indexes, so null them)
 
                     if ($delayed == true) {
-                        $nextTrainStringText = "<table id=\"nextTrainsTable\"><tr><td>$nextTrainNumbers[$index]&#9;$schedDisplay&#9;P$platform&#9;$destination</td><td id=\"nextTrainsTableDueLate\">$due</td></tr></table>";
+                        $nextTrainStringText = "<table class=\"nextTrainsTable\"><tr><td>$nextTrainNumbers[$index]&#9;$schedDisplay&#9;P$pltfm&#9;$destination</td><td id=\"nextTrainsTableDueLate\">$due</td></tr></table>";
                     }
                     else {
-                        $nextTrainStringText = "<table id=\"nextTrainsTable\"><tr><td>$nextTrainNumbers[$index]&#9;$schedDisplay&#9;P$platform&#9;$destination</td><td id=\"nextTrainsTableDueOnTime\">$due</td></tr></table>";
+                        $nextTrainStringText = "<table class=\"nextTrainsTable\"><tr><td>$nextTrainNumbers[$index]&#9;$schedDisplay&#9;P$pltfm&#9;$destination</td><td id=\"nextTrainsTableDueOnTime\">$due</td></tr></table>";
                     }
 
                     if ($nextTrainString = false) {
@@ -192,18 +196,15 @@
 
                 else {
                     
-                    $s_services = false; //Services was previously true, however none of them are trains, so reset to false
+                    $services = false; //Services was previously true, however none of them are trains, so reset to false
                     
                 }
             
             }
- ?>
-
-            <?php
         
         }
 
-        else { //($s_services == false) { //There are no services, or there are only non-train services.
+        if ($s_services == false || $servicesShown < 1) { //There are no services, or there are only non-train services.
 
             $debug_now = false;
             $expDate = false;
@@ -216,7 +217,7 @@
                             <table>
                                 <tr>
                                     <td id="noNextTrainTitle">
-                                        <?php echo $s_name; ?>
+                                        <?php echo $s_name;?>
                                     </td>
                                 </tr>
                             </table>
@@ -232,7 +233,12 @@
                                                     <div class="scrolling-text-item">
 <?php
                                                     if ($s_code != false) {
-                                                        echo "There are currenly no services stopping at this station.";
+                                                        if ($pltatformSet == true) {
+                                                            echo "There are currenly no services stopping at this station on platform $platform.";
+                                                        }
+                                                        else {
+                                                            echo "There are currenly no services stopping at this station.";
+                                                        }
                                                     }
                                                     else {
                                                         echo "ERROR: Invalid Station Code '$station'";
@@ -342,31 +348,32 @@
 <?php
 
     echo "</div> <!-- End displayBoardInnerWrapper DIV -->";
+    echo "<div class='bottomOfScreenText'>StationBoard - Paul Rowland - <a href='https://github.com/pauljrowland/StationDisplays' target='_blank'>Github</a></div";
     echo "</div> <!-- End displayBoardWrapper DIV -->";
 
     //Dump debug crap and full JSON
 
-    print "<br><br><br><br><br><br><br>-----DEBUG-----<br><br>";
-    print "Data retrieved from <a href='https://www.realtimetrains.co.uk/' target='_blank'>Realtime Trains</a> (<a href='https://api.rtt.io' target='_blank'>https://api.rtt.io</a>) at $timestamp<br><br>";
+    //print "<br><br><br><br><br><br><br>-----DEBUG-----<br><br>";
+    //print "Data retrieved from <a href='https://www.realtimetrains.co.uk/' target='_blank'>Realtime Trains</a> (<a href='https://api.rtt.io' target='_blank'>https://api.rtt.io</a>) at $timestamp<br><br>";
 
-    echo $debug_now;
+    //echo $debug_now;
 
-    foreach ($nextTrainStrings as $nextTrainString) {
-    echo "$nextTrainString<br>";
-    }
+    //foreach ($nextTrainStrings as $nextTrainString) {
+    //echo "$nextTrainString<br>";
+    //}
 
-    echo "Exp: $expDate<br>";
-    echo "TimeNow: $nowDate<br>";
-    echo "DueIn: $due<br>";
-    echo "Delay maybe of $delay mins";
+    //echo "Exp: $expDate<br>";
+    //echo "TimeNow: $nowDate<br>";
+    //echo "DueIn: $due<br>";
+    //echo "Delay maybe of $delay mins";
 
-    echo "<br><br><br>";
+//    echo "<br><br><br>";
+//
+ //   echo "Next Trains:<br><br>";
+  //  echo $debug_next;
 
-    echo "Next Trains:<br><br>";
-    echo $debug_next;
-
-    echo "<br><br>JSON Dump<br><br>";
-    echo json_encode($json, JSON_PRETTY_PRINT);
+    //echo "<br><br>JSON Dump<br><br>";
+    //echo json_encode($json, JSON_PRETTY_PRINT);
  
 ?>
 
