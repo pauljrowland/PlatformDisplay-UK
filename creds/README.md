@@ -2,7 +2,9 @@ In this directory (creds), create a new PHP file called creds.php to enable conn
 
 Make the contents as follows:
 
+```php
 <?php
     $username = "<Your RTT API Username>";
     $password = "<Your RTT API Password>";
 ?>
+```
