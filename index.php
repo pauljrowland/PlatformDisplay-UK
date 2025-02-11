@@ -11,7 +11,7 @@ refresh( 30 );
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>StationBoard</title>
+    <title>PlatformDisplay UK</title>
     <link rel="stylesheet" href="/assets/style.css">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -367,7 +367,7 @@ foreach ($nextTrainStrings as $nextTrainString) {
     </div> <!-- End displayBoardInnerWrapper DIV -->
     
     <div class='bottomOfScreenText'>
-        Live StationBoard
+        <?php echo $s_name; ?> - PlatformDisplay UK
     </div>
 
 </div> <!-- End displayBoardWrapper DIV -->
@@ -401,7 +401,7 @@ foreach ($nextTrainStrings as $nextTrainString) {
 ?>
 
 <div id="footer">
-    <p>StationBoard <?php echo date("Y"); ?> | PaulJRowland | <a href='https://github.com/pauljrowland/StationBoard' target='_blank'>Github</a></p>
+    <p>PlatformDisplay UK <?php echo date("Y"); ?> | PaulJRowland | <a href='https://github.com/pauljrowland/PlatformDisplay-UK' target='_blank'>Github</a></p>
     <p>With thanks to the <a href='https://www.realtimetrains.co.uk' target='_blank'>Realtime Trains</a> <a href='https://api.rtt.io' target='_blank'>API</a>
 </div>
 
