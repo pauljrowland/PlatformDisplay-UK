@@ -11,7 +11,7 @@ refresh( 30 );
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>PlatformDisplay UK</title>
+    <title>PlatformDisplay.UK</title>
     <link rel="stylesheet" href="/assets/style.css">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -21,8 +21,6 @@ refresh( 30 );
 <body>
 
 <?php
-
-$debug_next = null; //!!!!!------Used for listing additional stations in the debug log
 
 if(!isset($_GET['station'] ) || $_GET['station'] == null || $_GET['station'] == '') {
     $station = "KGX";
@@ -231,7 +229,6 @@ if ($s_services == true) { //There are services of some sort
     } //End Foreach service
     
     if ($s_services == false || $servicesShown < 1) { //There are no services, or there are only non-train services.
-        $debug_now = false;
         $expDate = false;
         $nowDate = false;
         $due = false;
@@ -372,36 +369,8 @@ foreach ($nextTrainStrings as $nextTrainString) {
 
 </div> <!-- End displayBoardWrapper DIV -->
 
-<?php
-
-//  Dump debug crap and full JSON
-//
-//  print "<br><br><br><br><br><br><br>-----DEBUG-----<br><br>";
-//  print "Data retrieved from <a href='https://www.realtimetrains.co.uk/' target='_blank'>Realtime Trains</a> (<a href='https://api.rtt.io' target='_blank'>https://api.rtt.io</a>) at $timestamp<br><br>";
-//
-//  echo $debug_now;
-//
-//  foreach ($nextTrainStrings as $nextTrainString) {
-//      echo "$nextTrainString<br>";
-//  }
-//
-//  echo "Exp: $expDate<br>";
-//  echo "TimeNow: $nowDate<br>";
-//  echo "DueIn: $due<br>";
-//  echo "Delay maybe of $delay mins";
-//
-//  echo "<br><br><br>";
-//
-//  echo "Next Trains:<br><br>";
-//  echo $debug_next;
-//
-//  echo "<br><br>JSON Dump<br><br>";
-//  echo json_encode($json, JSON_PRETTY_PRINT);
- 
-?>
-
 <div id="footer">
-    <p>PlatformDisplay UK <?php echo date("Y"); ?> | PaulJRowland | <a href='https://github.com/pauljrowland/PlatformDisplay-UK' target='_blank'>Github</a></p>
+    <p>PlatformDisplay.UK <?php echo date("Y"); ?> | PaulJRowland | <a href='https://github.com/pauljrowland/PlatformDisplay-UK' target='_blank'>Github</a></p>
     <p>With thanks to the <a href='https://www.realtimetrains.co.uk' target='_blank'>Realtime Trains</a> <a href='https://api.rtt.io' target='_blank'>API</a>
 </div>
 
