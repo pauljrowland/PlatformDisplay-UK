@@ -38,12 +38,23 @@ else {
     $pltatformSet = true;
 }
 
+if((!isset($_GET['delayinfo'] )) || ($_GET['delayinfo'] == null || $_GET['delayinfo'] == '' || $_GET['delayinfo'] == 'false')) {
+    $showDelayInfo = false;
+}
+elseif ($_GET['delayinfo'] == "true" ) {
+    $showDelayInfo = $_GET['delayinfo'];
+}
+else {
+    $showDelayInfo = false;
+}
+
 ?>
 
-<a href="?station=ncl">NCL</a> - <a href="?station=kgx">KGX</a> - <a href="?station=asl">ASL</a> - <a href="?station=nwh">NWH</a> - <a href="?station=car">CAR</a> - <a href="?station=sun">SUN</a> - <a href="?station=nlw">NLW</a> - <a href="?station=zzz">ZZZ</a><br><br>
+<a href="?station=ncl<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">NCL</a> - <a href="?station=kgx<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">KGX</a> - <a href="?station=asl<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">ASL</a> - <a href="?station=nwh<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">NWH</a> - <a href="?station=car<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">CAR</a> - <a href="?station=sun<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">SUN</a> - <a href="?station=nlw<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">NLW</a> - <a href="?station=zzz<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">ZZZ</a><br><br>
 <form action=".">
     Manual Station Code: <input name="station" id="station" type="text" required value="<?php echo $station;?>"><br>
-    Platform Number (leave blank for all): <input name="platform" id="platform" type="text" value="<?php echo $platform;?>">
+    Platform Number (leave blank for all): <input name="platform" id="platform" type="text" value="<?php echo $platform;?>"><br>
+    Show expected time on destination label: <input name="delayinfo" id="delayinfo" type="checkbox" value="true" <?php if ($showDelayInfo == true) { echo "checked";} ?>>
     <input type="Submit">
 </form>
 
@@ -103,6 +114,7 @@ if ($json_services == true) { //There are services of some sort
         $json_gbttBookedDeparture = $s_service->locationDetail->gbttBookedDeparture ?? "Booked Departure Unknown"; //When should it leave?
         $json_gbttBookedDepartureDisplay = substr_replace($json_gbttBookedDeparture, ":", 2, 0);
         $json_realtimeDeparture = $s_service->locationDetail->realtimeDeparture ?? "-"; //When is it likely to leave?
+        $json_realtimeDepartureDisplay = substr_replace($json_realtimeDeparture, ":", 2, 0);
         $json_realtimeArrivalActual = $s_service->locationDetail->realtimeArrivalActual ?? false; //Has it arived?
         $json_origins = $s_service->locationDetail->origin ?? "Origin Unknown"; //All origins
         $json_origin = $json_origins[0]->description ?? "Origin unkown"; //Where is it from?
@@ -125,15 +137,19 @@ if ($json_services == true) { //There are services of some sort
             $diff_NowAndExpected = abs(strtotime($expDateObj) - strtotime($nowDateObj));
             $diff_NowAndExpected = round($diff_NowAndExpected /60,2);//->format('%i');
 
-            if ($diff_SchedActual > 0) {
-                $delayed = true;
-                $json_destination = "$json_destination    (+$diff_SchedActual min)";
+            if ($diff_SchedActual > 0) { //The difference between scheduled and expected is greater than 0 - the train is late.
+                $delayed = true; //Set delayed to true
+                if ($showDelayInfo == "true") { //The user has chosen to see this (as opposed to just flashing text). Add the delay onto the destination text.
+                    $json_destination = "$json_destination    (Exp: $json_realtimeDepartureDisplay)";
+                }
             }
-            else {
+            else { //The train is on time
                 $delayed = false;
-                $json_destination = "$json_destination    (On Time)";
-
+                if ($showDelayInfo == "true") { //The user has chosen to see this (as opposed to just green). Add that it is on time onto the destination text.
+                    $json_destination = "$json_destination    (On Time)";
+                }
             }
+
         }
         
         //if ($diff_NowAndExpected <= 0 AND $json_realtimeArrivalActual == false) { //Train is due, but isn't here yet - mark as late
