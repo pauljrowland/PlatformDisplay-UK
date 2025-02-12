@@ -106,20 +106,24 @@ if ($s_services == true) { //There are services of some sort
 
         $schedDate = date("Y-m-d"); //Get today's date
         $schedDate = "$schedDate-$sched"; //Add on the scheduled time
-        $schedDateObj = DateTime::createFromFormat('Y-m-d-Hi', $schedDate); //Convert to object
+        $schedDateObj = date("Y-m-d Hi", strtotime($schedDate));
 
         $expDate = date("Y-m-d"); //Get today's date
-        $expDate = "$expDate-$expect"; //Add on the expected time
-        $expDateObj = DateTime::createFromFormat('Y-m-d-Hi', $expDate); //Convert to object
+        $expDate = "$expDate $expect"; //Add on the expected time
+        $expDateObj = date("Y-m-d Hi", strtotime($expDate));
 
         $nowDate = date("Y-m-d-Hi"); //Get date and time now;
-        $nowDateObj = DateTime::createFromFormat('Y-m-d-Hi', $nowDate); //Convert to object
+        $nowDateObj = date("Y-m-d Hi", strtotime($nowDate));
         
         if ($expDateObj == true) { //There is an expected time - let's work out if it's delayed ot not.
-            $deviation = date_diff($schedDateObj,$expDateObj); //Work out the difference
-            $delay = $deviation->format('%i');
-            $interval = date_diff($expDateObj,$nowDateObj); //Work out the difference
-            $due = $interval->format('%i');
+            
+
+            $deviation = abs(strtotime($schedDateObj) - strtotime($expDateObj));
+            $delay = round($deviation /60,2);//->format('%i');
+
+            $interval = abs(strtotime($expDateObj) - strtotime($nowDateObj));
+            $due = round($interval /60,2);//->format('%i');
+
             if ($delay > 0) {
                 $delayed = true;
             }
