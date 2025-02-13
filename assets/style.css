@@ -55,8 +55,8 @@ div.topOfScreenText > * {
     width:400px;
     height:80px;
     text-align: center;
-    font-size:75px;
-    line-height: 80px;
+    font-size:45px;
+    line-height: 75px;
     color: orange;
     vertical-align: middle;
     border-bottom-left-radius: 20px;
@@ -92,7 +92,7 @@ div.topOfScreenText > * {
 }
 
 .board-top td {
-    font-size:50px;
+    font-size:40px;
 }
 
 #nextTrainTime {
@@ -248,7 +248,7 @@ div.topOfScreenText > * {
 }
 
 .board-bottom td {
-    font-size:50px;
+    font-size:40px;
 }
 
 #boardBottomText{
@@ -260,14 +260,12 @@ div.topOfScreenText > * {
 .nextTrainsTable {
     width:100%;
     white-space: nowrap;
-    overflow: scroll;
     text-align: left;
 }
 
 .nextTrainsTableStaticText {
     width:100%;
-    white-space: nowrap;
-    overflow: scroll;
+/*    white-space: nowrap;*/
     text-align: center;
 }
 
@@ -297,11 +295,11 @@ div.topOfScreenText > * {
     background-color: black;
     color: white;
     text-align: center;
-    line-height: 5px;
+    line-height: 8px;
   }
 
   #footer  * {
     color: rgba(255,255,255,0.4);
     text-shadow: 0 -2px  rgba(0,0,0,0.6);
-    font-size: 20px;
+    font-size: 18px;
 }

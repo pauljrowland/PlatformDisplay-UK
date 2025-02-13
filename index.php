@@ -342,7 +342,7 @@ if ($json_services == true) { //There are services of some sort
 
                         $dateDisplay = date("l jS F Y");
 
-                        if ($json_name) { //If the station is valid
+                        if ($json_name AND ($json_services == true || $servicesShown > 0)) { //If the station is valid
 
                             $wordlist[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$json_name</td></tr></table>\",";
                             $wordlist[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$dateDisplay</td></tr></table>\",";
