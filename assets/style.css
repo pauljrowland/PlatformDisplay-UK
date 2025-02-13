@@ -10,7 +10,7 @@ body {
 #displayBoardWrapper {
     display: block;
     width:95%;
-    min-width: 750px;
+    min-width: 1250px; /* Set at this as "Rhoose Cardiff International Airport" is the longest station name (that's not Llanfair: */
     background-color: silver;
     margin: auto;
     padding:10px;
@@ -96,14 +96,14 @@ div.topOfScreenText > * {
 }
 
 #nextTrainTime {
-    width:110px;
+    width:130px;
     margin: 0;
     text-align: left;
     color:#f01c5c;
 }
 
 #nextTrainPlatform {
-    width:80px;
+    width:100px;
     text-align: center;
     color:lightgray;
 }
@@ -113,12 +113,13 @@ div.topOfScreenText > * {
     overflow: hidden;
     text-align: left;
     color:#f2ad19;
+    width:auto;
 }
 
 #nextTrainExpected{
     white-space: nowrap;
     overflow: hidden;
-    width:275px;
+    width:285px;
     text-align: right;
     color:green;
 }
