@@ -91,8 +91,16 @@ $json_services = $obj->services ?? false; //Services
 ?>
 
 <div id='displayBoardWrapper'>
-    <div id="clock">
-        <script src="/assets/clock.js"></script>
+
+    <div class='topOfScreenText'>
+        <?php
+            if ($json_name) { //If the station is valid
+                echo $json_name;
+            }
+            else {
+                echo "Invalid Station Code: '$station'";
+            }
+        ?> - PlatformDisplay UK
     </div>
 
     <div id='displayBoardInnerWrapper'>
@@ -322,10 +330,10 @@ if ($json_services == true) { //There are services of some sort
                         <div id="wordContainer">
                             <?php
                                 if ($json_name) { //If the station is valid
-                                    echo $json_name;
+                                    echo "<table class='nextTrainsTableStaticText'><tr><td>$json_name</td></tr></table>";
                                 }
                                 else {
-                                    echo "Invalid Station Code: '$station'";
+                                    echo "<table class='nextTrainsTableStaticText'><tr><td>Invalid Station Code: '$station'</td></tr></table>";
                                 }
                             ?>
                         </div> 
@@ -336,8 +344,8 @@ if ($json_services == true) { //There are services of some sort
 
                         if ($json_name) { //If the station is valid
 
-                            $wordlist[] = "\"$json_name\",";
-                            $wordlist[] = "\"$dateDisplay\",";
+                            $wordlist[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$json_name</td></tr></table>\",";
+                            $wordlist[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$dateDisplay</td></tr></table>\",";
 
                             $changeTrainTextStringIndex = 0;
 
@@ -354,8 +362,8 @@ if ($json_services == true) { //There are services of some sort
                         }
                         else {
 
-                            $wordlist[] = "\"Invalid Station Code: '$station'\",";
-                            $wordlist[] = "\"$dateDisplay\",";
+                            $wordlist[] = "\"<table class='nextTrainsTableStaticText'><tr><td>Invalid Station Code: '$station'</td></tr></table>\",";
+                            $wordlist[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$dateDisplay</td></tr></table>\",";
 
                         }
 
@@ -383,19 +391,10 @@ if ($json_services == true) { //There are services of some sort
                 </tr>
             </table>
         </div>
-    </div> <!-- End displayBoardInnerWrapper DIV -->
-    
-    <div class='bottomOfScreenText'>
-        <?php
-            if ($json_name) { //If the station is valid
-                echo $json_name;
-            }
-            else {
-                echo "Invalid Station Code: '$station'";
-            }
-        ?> - PlatformDisplay UK
+        <div id="clock">
+        <script src="/assets/clock.js"></script>
     </div>
-
+    </div> <!-- End displayBoardInnerWrapper DIV -->
 </div> <!-- End displayBoardWrapper DIV -->
 
 <div id="footer">
