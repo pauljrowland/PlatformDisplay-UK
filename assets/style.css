@@ -269,7 +269,7 @@ body {
     text-shadow: 0 -2px  rgba(0,0,0,0.6);
     font-size: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow: scroll;
+    overflow: hidden;
 }
 
 div.bottomOfScreenText > * {
