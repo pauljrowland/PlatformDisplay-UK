@@ -293,7 +293,7 @@ if ($json_services == true) { //There are services of some sort
         }
     }
     else {
-        echo "ERROR: Invalid Station Code '$station'";
+        echo "ERROR: Invalid Station Code: '$station'";
     }
 ?>
 
@@ -320,18 +320,28 @@ if ($json_services == true) { //There are services of some sort
                         <!--<span id="bottomRow"></span>-->
 
                         <div id="wordContainer">
-                            <?php echo $json_name; ?>
+                            <?php
+                                if ($json_name) { //If the station is valid
+                                    echo $json_name;
+                                }
+                                else {
+                                    echo "Invalid Station Code: '$station'";
+                                }
+                            ?>
                         </div> 
 
 <?php
 
                         $dateDisplay = date("l jS F Y");
-                        $timeDisplay = date("h:i");
 
-                        $wordlist[] = "\"$json_name\",";
-                        $wordlist[] = "\"$dateDisplay\",";
-                        $changeTrainTextStringIndex = 0;
-                        foreach ($nextTrainTextStrings as $nextTrainTextString) {
+                        if ($json_name) { //If the station is valid
+
+                            $wordlist[] = "\"$json_name\",";
+                            $wordlist[] = "\"$dateDisplay\",";
+
+                            $changeTrainTextStringIndex = 0;
+
+                            foreach ($nextTrainTextStrings as $nextTrainTextString) {
                                     $changeTrainTextStringIndex++;
                                     if ($changeTrainTextStringIndex < count($nextTrainTextStrings)) {
                                         $wordlist[] = "\"$nextTrainTextString\",";
@@ -340,7 +350,14 @@ if ($json_services == true) { //There are services of some sort
                                         $wordlist[] =  "\"$nextTrainTextString\"";
                                     }
                                     
-                                }
+                            }
+                        }
+                        else {
+
+                            $wordlist[] = "\"Invalid Station Code: '$station'\",";
+                            $wordlist[] = "\"$dateDisplay\",";
+
+                        }
 
 ?>
 
@@ -369,7 +386,14 @@ if ($json_services == true) { //There are services of some sort
     </div> <!-- End displayBoardInnerWrapper DIV -->
     
     <div class='bottomOfScreenText'>
-        <?php echo $json_name; ?> - PlatformDisplay UK
+        <?php
+            if ($json_name) { //If the station is valid
+                echo $json_name;
+            }
+            else {
+                echo "Invalid Station Code: '$station'";
+            }
+        ?> - PlatformDisplay UK
     </div>
 
 </div> <!-- End displayBoardWrapper DIV -->
