@@ -399,7 +399,7 @@ if ($json_services == true) { //There are services of some sort
 
 <div id="footer">
     <p>
-        PlatformDisplay.UK<?php echo date("Y"); ?> | PaulJRowland | <a href='https://github.com/pauljrowland/PlatformDisplay-UK' target='_blank'>Github</a>. With thanks to the <a href='https://www.realtimetrains.co.uk' target='_blank'>Realtime Trains</a> <a href='https://api.rtt.io' target='_blank'>API</a>
+        PlatformDisplay.UK <?php echo date("Y"); ?> | PaulJRowland | <a href='https://github.com/pauljrowland/PlatformDisplay-UK' target='_blank'>Github</a> | <a href='https://www.realtimetrains.co.uk' target='_blank'>Realtime Trains</a> <a href='https://api.rtt.io' target='_blank'>API</a>
     </p>
 </div>
 
