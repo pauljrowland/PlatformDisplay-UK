@@ -91,6 +91,10 @@ $json_services = $obj->services ?? false; //Services
 ?>
 
 <div id='displayBoardWrapper'>
+    <div id="clock">
+        <script src="/assets/clock.js"></script>
+    </div>
+
     <div id='displayBoardInnerWrapper'>
 
 <?php
@@ -113,6 +117,7 @@ if ($json_services == true) { //There are services of some sort
         $json_atocName = $s_service->atocName ?? "Operator Name Unknown"; //Operator friendly name
         $json_gbttBookedDeparture = $s_service->locationDetail->gbttBookedDeparture ?? "Booked Departure Unknown"; //When should it leave?
         $json_gbttBookedDepartureDisplay = substr_replace($json_gbttBookedDeparture, ":", 2, 0);
+        $json_gbttBookedDepartureNextDay = $s_service->locationDetail->gbttBookedDepartureNextDay ?? false; //Next day departure
         $json_realtimeDeparture = $s_service->locationDetail->realtimeDeparture ?? "-"; //When is it likely to leave?
         $json_realtimeDepartureDisplay = substr_replace($json_realtimeDeparture, ":", 2, 0);
         $json_realtimeArrivalActual = $s_service->locationDetail->realtimeArrivalActual ?? false; //Has it arived?
@@ -235,18 +240,15 @@ if ($json_services == true) { //There are services of some sort
             $nextTrainNumbers = array(null, null, "2nd","3rd","4th","5th","6th","7th","8th","9th","10th"); //Display numbers for next trains (0 and 1 are the first 2 indexes, so null them)
             
             if ($delayed == true) {
-                $nextTrainStringText = "<table class=\"nextTrainsTable\"><tr><td>$nextTrainNumbers[$index]&#9;$json_gbttBookedDepartureDisplay&#9;P$json_platform&#9;$json_destination</td><td id=\"nextTrainsTableDueLate\">$diff_NowAndExpected</td></tr></table>";
+                $nextTrainTextStrings[] = "<table class='nextTrainsTable'><tr><td>$nextTrainNumbers[$index]&#9;$json_gbttBookedDepartureDisplay&#9;P$json_platform&#9;$json_destination</td><td id='nextTrainsTableDueLate'>$diff_NowAndExpected</td></tr></table>";
+                $nextTrainStringDelayed = true;
             }
             else {
-                $nextTrainStringText = "<table class=\"nextTrainsTable\"><tr><td>$nextTrainNumbers[$index]&#9;$json_gbttBookedDepartureDisplay&#9;P$json_platform&#9;$json_destination</td><td id=\"nextTrainsTableDueOnTime\">$diff_NowAndExpected</td></tr></table>";
+                $nextTrainTextStrings[] = "<table class='nextTrainsTable'><tr><td>$nextTrainNumbers[$index]&#9;$json_gbttBookedDepartureDisplay&#9;P$json_platform&#9;$json_destination</td><td id='nextTrainsTableDueOnTime'>$diff_NowAndExpected</td></tr></table>";
+                $nextTrainStringDelayed = false;
+
             }
 
-            if ($nextTrainString = false) {
-                $nextTrainStrings = array($nextTrainStringText);
-            }       
-            else {
-                $nextTrainStrings[] = $nextTrainStringText;
-            }
         }
         else {
             $services = false; //Services was previously true, however none of them are trains, so reset to false
@@ -255,7 +257,7 @@ if ($json_services == true) { //There are services of some sort
         }
         
     } //End Foreach service
-    
+
     if ($json_services == false || $servicesShown < 1) { //There are no services, or there are only non-train services.
         $expDate = false;
         $nowDate = false;
@@ -311,80 +313,55 @@ if ($json_services == true) { //There are services of some sort
 
 ?>
 
-<script>
-    function sleep(miliseconds) {
-        var currentTime = new Date().getTime();while (currentTime + miliseconds >= new Date().getTime()) {
-        }
-    }
-    timeout = 1000; //1000 Is about 5 seconds
-    message1 = 0;
-    message2 = 0;
-    message3 = 0;
-    message4 = 0;
-    message5 = 0;
-    message6 = 0;
-    message7 = 0;
-    message8 = 0;
-    let a;
-    let time;
-    var timeDisplay = setInterval(() => {
-        if (++message1 < timeout){
-            display = "<?php echo $json_name; ?>";
-            document.getElementById('boardBottomText').style.textAlign = 'center'; 
-            document.getElementById('bottomRow').innerHTML = display;
-        }
-        else if (++message2 < timeout) {
-            a = new Date();
-            day = a.getDate();
-            dayName = new Date(a).toLocaleString('en-us', {weekday:'long'})
-            if (day == 1 || day == 21 || day == 31 ) {suffix = "st";}
-            else if (day == 2 || day == 22) {suffix = "nd";}
-            else if (day == 3 || day == 23) {suffix = "rd";}
-            else {suffix = "th";}
-            monthName = new Date(a).toLocaleString('en-us', {month:'long'})
-            year = a.getFullYear()
-            display = dayName + ' ' + day + suffix + ' ' + monthName + ' ' + year;
-            document.getElementById('boardBottomText').style.textAlign = 'center'; 
-            document.getElementById('bottomRow').innerHTML = display;
-        }
-        else if (++message3 < timeout) {
-            a = new Date();
-            var time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second: '2-digit'});
-            document.getElementById('boardBottomText').style.textAlign = 'center'; 
-            document.getElementById('bottomRow').innerHTML = time;
-            }
-
-<?php
-
-$additionalTrains = 0;
-foreach ($nextTrainStrings as $nextTrainString) {
-    $additionalTrains++;
-    $message = $additionalTrains + 3;
-    echo "else if (++message$message < timeout) {
-        document.getElementById('boardBottomText').style.textAlign = 'left';
-        document.getElementById('bottomRow').innerHTML = '$nextTrainString';
-    }";
-}
-?>
-
-        else {
-            message1 = 0;
-            message2 = 0;
-            message3 = 0;
-            message4 = 0;
-            message5 = 0;
-            message6 = 0;
-            message7 = 0;
-            message8 = 0;
-        }
-    }, 1);
-</script>
-        
         <div class='board-bottom'>
             <table>
                 <tr>
                     <td id="boardBottomText">
-                        <span id="bottomRow"></span>
+                        <!--<span id="bottomRow"></span>-->
+
+                        <div id="wordContainer">
+                            <?php echo $json_name; ?>
+                        </div> 
+
+<?php
+
+                        $dateDisplay = date("l jS F Y");
+                        $timeDisplay = date("h:i");
+
+                        $wordlist[] = "\"$json_name\",";
+                        $wordlist[] = "\"$dateDisplay\",";
+                        $changeTrainTextStringIndex = 0;
+                        foreach ($nextTrainTextStrings as $nextTrainTextString) {
+                                    $changeTrainTextStringIndex++;
+                                    if ($changeTrainTextStringIndex < count($nextTrainTextStrings)) {
+                                        $wordlist[] = "\"$nextTrainTextString\",";
+                                    }
+                                    else {
+                                        $wordlist[] =  "\"$nextTrainTextString\"";
+                                    }
+                                    
+                                }
+
+?>
+
+                    <script> 
+                    
+                        const words = [<?php foreach ($wordlist as $word) {
+                            echo $word;
+                        }?>];
+                            
+                        let changeTrainTextStringindex = 0; 
+
+                        function changeTrainTextString() { 
+                            changeTrainTextStringindex = (changeTrainTextStringindex + 1) % words.length; // Cycle through the words 
+                            document.getElementById("wordContainer").innerHTML = words[changeTrainTextStringindex]; 
+                        } 
+
+                        setInterval(changeTrainTextString, 3000); // Change word every 2 seconds 
+                        
+                    </script>
+
+
                     </td>
                 </tr>
             </table>
