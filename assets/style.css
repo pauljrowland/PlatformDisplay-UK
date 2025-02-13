@@ -96,15 +96,15 @@ div.topOfScreenText > * {
 }
 
 #nextTrainTime {
-    width:130px;
+    width:140px;
     margin: 0;
     text-align: left;
     color:#f01c5c;
 }
 
 #nextTrainPlatform {
-    width:100px;
-    text-align: center;
+    width:130px;
+    text-align: left;
     color:lightgray;
 }
 
