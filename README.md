@@ -1,6 +1,6 @@
 # PlatformDisplay UK
 
-**PLEASE NOTE**: This is still very much a work in porogress and some features may not work correctly or be missing.**
+**PLEASE NOTE: This is still very much a work in progress and some features may not work correctly or be missing.**
 
 For a working example you are free to use to your heart's content please visit [PlatformDisplay UK](https://platformdisplay.uk/).
 
