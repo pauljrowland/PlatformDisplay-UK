@@ -170,7 +170,7 @@ if ($json_services == true) { //There are services of some sort
         //    $delayed = true;
         //}
         if ($diff_NowAndExpected == 0 AND $json_realtimeArrivalActual == false) { //The train is within 1 minute away, so may as well say it's Due
-            $diff_NowAndExpected = "Due";
+            $diff_NowAndExpected = "Approaching";
         }
         elseif ($json_realtimeArrivalActual == true) { //RTT has confirmed the train is in the platform
             $diff_NowAndExpected = "At Platform";
