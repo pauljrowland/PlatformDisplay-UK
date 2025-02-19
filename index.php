@@ -23,7 +23,7 @@ refresh( 30 );
 <?php
 
 if(!isset($_GET['station'] ) || $_GET['station'] == null || $_GET['station'] == '') {
-    $station = "KGX";
+    $station = "NCL";
 }
 else {
     $station = $_GET['station'];
@@ -45,7 +45,7 @@ elseif ($_GET['delayinfo'] == "true" ) {
     $showDelayInfo = $_GET['delayinfo'];
 }
 else {
-    $showDelayInfo = false;
+    $showDelayInfo = true;
 }
 
 ?>
@@ -62,31 +62,26 @@ else {
 
 <?php
 
-// API Query
-$apiUrl = "https://api.rtt.io/api/v1/json/search/$station"; //RTT API URL
+$station = strtoupper($station);
 
-// Request options
+// API Query
+$apiUrl = "https://api1.raildata.org.uk/1010-live-departure-board-dep1_2/LDBWS/api/20220120/GetDepBoardWithDetails/$station";
+
 include("creds/creds.php"); //External password file
 $opts = [
     "http" => [
         'method'  => 'GET',
-        'header'  => [
-            'Content-Type: application/x-www-form-urlencoded',
-            'header' => "Authorization: Basic " . base64_encode("$username:$password")
-            ]
+        'header' => 'x-apikey: '.$apiKey
         ]
     ];
 
-//$timestamp = date(DATE_RFC2822); //Timestamp the script run
-
-$timestamp = date("Y-m-d-Hi"); // Timestamp now
 $context = stream_context_create($opts); //Get result
 $json = file_get_contents($apiUrl, false, $context); //Convert to PHP JSON
 $obj = json_decode($json); //Store PHP JSON as object
 
-$json_name = $obj->location->name ?? false; //Station Name
-$json_crs = $obj->location->crs ?? false; //Station Code
-$json_services = $obj->services ?? false; //Services
+$json_name = $obj->locationName ?? false; // Station Name
+$json_crs = $obj->crs ?? false; //Station Code
+$json_services = $obj->trainServices ?? false; //Services
 
 ?>
 
@@ -117,43 +112,42 @@ if ($json_services == true) { //There are services of some sort
         
         $index++; //Increment by one so this reflects how many services we've looped through
 
-        $json_trainIdentity = $s_service->trainIdentity ?? "Identity Unknown"; //Train identity (head code)
-        $json_destinations = $s_service->locationDetail->destination ?? "Destination Unknown"; //All train calling destinations
-        $json_destination  = $json_destinations[0]->description ?? "Description Unknown"; //First destination returned is the last the train will stop at
-        $json_platform = $s_service->locationDetail->platform ?? "-"; //Platform number. Set to "-" if unknown or a single platform station
-        $json_atocCode = $s_service->atocCode ?? "Operator Code Unknown"; //Operator code, i.e. LD
-        $json_atocName = $s_service->atocName ?? "Operator Name Unknown"; //Operator friendly name
-        $json_gbttBookedDeparture = $s_service->locationDetail->gbttBookedDeparture ?? "Booked Departure Unknown"; //When should it leave?
-        $json_gbttBookedDepartureDisplay = substr_replace($json_gbttBookedDeparture, ":", 2, 0);
-        $json_gbttBookedDepartureNextDay = $s_service->locationDetail->gbttBookedDepartureNextDay ?? false; //Next day departure
-        $json_realtimeDeparture = $s_service->locationDetail->realtimeDeparture ?? "-"; //When is it likely to leave?
-        $json_realtimeDepartureDisplay = substr_replace($json_realtimeDeparture, ":", 2, 0);
-        $json_realtimeArrivalActual = $s_service->locationDetail->realtimeArrivalActual ?? false; //Has it arived?
-        $json_origins = $s_service->locationDetail->origin ?? "Origin Unknown"; //All origins
-        $json_origin = $json_origins[0]->description ?? "Origin unkown"; //Where is it from?
+        $json_serviceID = $s_service->serviceID ?? "Identity Unknown"; //Train identity (head code)
+        $json_destination = $s_service->destination[0]->locationName ?? "Destination Unknown"; //All train calling destinations
+        $json_platform = $s_service->platform ?? "-"; //Platform number. Set to "-" if unknown or a single platform station
+        $json_operatorCode = $s_service->operatorCode ?? "Operator Code Unknown"; //Operator code, i.e. LD
+        $json_operator = $s_service->operator ?? "Operator Name Unknown"; //Operator friendly name
+        $json_std = $s_service->std ?? "Booked Departure Unknown"; //When should it leave?
+        $json_etd = $s_service->etd ?? "-"; //When is it likely to leave?
+        if ($json_etd == "On time") {$json_etd = $s_service->std; }
+        $json_length = $s_service->length ?? "Unknown length"; //Operator friendly name
+        $json_origin = $s_service->origin[0]->locationName  ?? "Origin unkown"; //Where is it from?
+        $json_callingPoints = $s_service->subsequentCallingPoints[0]->callingPoint ?? "Where is is going?";
 
-        $schedDate = date("Y-m-d"); //Get today's date
-        $schedDate = "$schedDate-$json_gbttBookedDeparture"; //Add on the scheduled time to the end of the date
-        $schedDateObj = date("Y-m-d Hi", strtotime($schedDate)); //Convert to date string
+                    $json_gbttBookedDepartureNextDay = $s_service->locationDetail->gbttBookedDepartureNextDay ?? false; //Next day departure
+                    $json_realtimeArrivalActual = $s_service->locationDetail->std ?? false; //Has it arived?
 
-        $expDate = date("Y-m-d"); //Get today's date
-        $expDate = "$expDate $json_realtimeDeparture"; //Add on the expected time to the end of the date
-        $expDateObj = date("Y-m-d Hi", strtotime($expDate)); //Convert to date string
+        $stdDate = date("Y-m-d"); //Get today's date
+        $stdDate = "$stdDate-$json_std"; //Add on the scheduled time to the end of the date
+        $stdDateObj = date("Y-m-d H:i", strtotime($stdDate)); //Convert to date string
+        $etdDate = date("Y-m-d"); //Get today's date
+        $etdDate = "$etdDate $json_etd"; //Add on the expected time to the end of the date
+        $etdDateObj = date("Y-m-d H:i", strtotime($etdDate)); //Convert to date string
+        $nowDate = date("Y-m-d-Hi"); // Timestamp now
+        $nowDateObj = date("Y-m-d H:i", strtotime($nowDate)); //Convert the now timestamp to a date string too
 
-        $nowDateObj = date("Y-m-d Hi", strtotime($timestamp)); //Convert the now timestamp to a date string too
-        
-        if ($expDateObj == true) { //There is an expected time - let's work out if it's delayed ot not.
+        if ($etdDateObj == true) { //There is an expected time - let's work out if it's delayed ot not.
             
-            $diff_SchedActual = abs(strtotime($schedDateObj) - strtotime($expDateObj)); 
+            $diff_SchedActual = abs(strtotime($stdDateObj) - strtotime($etdDateObj)); 
             $diff_SchedActual= round($diff_SchedActual /60,2);//->format('%i');
 
-            $diff_NowAndExpected = abs(strtotime($expDateObj) - strtotime($nowDateObj));
+            $diff_NowAndExpected = abs(strtotime($etdDateObj) - strtotime($nowDateObj));
             $diff_NowAndExpected = round($diff_NowAndExpected /60,2);//->format('%i');
 
             if ($diff_SchedActual > 0) { //The difference between scheduled and expected is greater than 0 - the train is late.
                 $delayed = true; //Set delayed to true
                 if ($showDelayInfo == "true") { //The user has chosen to see this (as opposed to just flashing text). Add the delay onto the destination text.
-                    $json_destination = "$json_destination    (Exp: $json_realtimeDepartureDisplay)";
+                    $json_destination = "$json_destination    (Exp: $json_etd)";
                 }
             }
             else { //The train is on time
@@ -165,10 +159,6 @@ if ($json_services == true) { //There are services of some sort
 
         }
         
-        //if ($diff_NowAndExpected <= 0 AND $json_realtimeArrivalActual == false) { //Train is due, but isn't here yet - mark as late
-        //    $diff_NowAndExpected = "Due";
-        //    $delayed = true;
-        //}
         if ($diff_NowAndExpected == 0 AND $json_realtimeArrivalActual == false) { //The train is likely to be approaching 
             $diff_NowAndExpected = "Due";
         }
@@ -178,13 +168,16 @@ if ($json_services == true) { //There are services of some sort
         elseif ($json_realtimeArrivalActual == true) { //RTT has confirmed the train is in the platform
             $diff_NowAndExpected = "At Platform";
         }
+        elseif ($json_etd == "Delayed") { 
+            $diff_NowAndExpected = "Delayed";
+        }
         else {
             $diff_NowAndExpected = "$diff_NowAndExpected min"; //None of the above are correct - so show how many minutes there are remaining
         }
         
-        if ($json_atocCode == "LD") {
-            $json_atocName = "Lumo";
-        } //Lumo shows on RTT as unknown, fix this.
+        //if ($json_operatorCode == "LD") {
+        //    $json_operator = "Lumo";
+        //} //Lumo shows on RTT as unknown, fix this.
         
         if ($index > 0 AND $s_service->serviceType != "train") { //Next train is say a bus, don't display it - so reset the index to 0, meaning the next real train shows
             $index--;
@@ -199,8 +192,8 @@ if ($json_services == true) { //There are services of some sort
 
         <script> //Switch the train identity and headcode
             var texts = new Array();
-            texts.push("<?php echo $json_trainIdentity; ?>");
-            texts.push("<?php echo $json_gbttBookedDepartureDisplay; ?>");
+            /*texts.push("<?php echo $json_serviceID; ?>");*/
+            texts.push("<?php echo $json_std; ?>");
             point = 0;
             function changeText(){
                 if(point < ( texts.length - 1 ) ){
@@ -217,7 +210,7 @@ if ($json_services == true) { //There are services of some sort
         <div class='board-top'>
             <table>
                 <tr>
-                    <td id='nextTrainTime'><?php echo $json_gbttBookedDepartureDisplay; ?></td>
+                    <td id='nextTrainTime'><?php echo $json_std; ?></td>
                     <td id='nextTrainPlatform'>P<?php echo $json_platform;?></td>
                     <td id='nextTrainDest'><?php echo $json_destination;?></td>
                     <td id='nextTrainExpected'<?php if ($delayed == true) {echo " style='color:red;' class='blink_me'>";} else {echo ">";}; echo $diff_NowAndExpected;?></td>
@@ -232,8 +225,40 @@ if ($json_services == true) { //There are services of some sort
                         <div class="scrolling-text-container">
                             <div class="scrolling-text-inner" style="--marquee-speed: 30s; --direction:scroll-left" role="marquee">
                                 <div class="scrolling-text">
-                                    <div class="scrolling-text-item">This is the <?php echo $json_atocName;?> service from <?php echo $json_origin;?>.</div>
-                                    <div class="scrolling-text-item">Calling at xxxxxx (xx:xx), xxxxxx (xx:xx) and xxxxx (xx:xx).</div>
+                                    <div class="scrolling-text-item">This is the <?php echo $json_operator;?> service from <?php echo $json_origin;?>.</div>
+                                    <div class="scrolling-text-item">
+                                        <?php
+
+                                            $callingPointIndex = 1;
+                                            $callingAtListStr = "Calling at ";
+                                            foreach ($json_callingPoints as $json_calling_point) {
+                                                if (count($json_callingPoints) == 1) {
+                                                    $callingLocationName = $json_calling_point->locationName;
+                                                    $callingAtListStr .= "$callingLocationName only.";
+                                                }
+                                                elseif ($callingPointIndex < count($json_callingPoints)) {
+                                                    if ($callingPointIndex == 1) {
+                                                        $callingLocationName = $json_calling_point->locationName;
+                                                        $callingAtListStr .= "$callingLocationName";
+                                                        $callingPointIndex++;
+                                                    }
+                                                    else {                                           
+                                                        $callingLocationName = $json_calling_point->locationName;
+                                                        $callingAtListStr .= ", $callingLocationName";
+                                                        $callingPointIndex++;
+                                                    }
+                                                }
+                                                else {
+                                                    $callingLocationName = $json_calling_point->locationName;
+                                                    $callingAtListStr .= " and $callingLocationName.";
+                                                }
+                                            }
+
+                                            echo $callingAtListStr;
+
+                                        ?>
+                                    </div>
+                                    <?php if ($json_length > 0) { echo "<div class='scrolling-text-item'>This train is made up of $json_length carriages.</div>"; }?>
                                     <div class="scrolling-text-item">Some class of seating is available.</div>
                                 </div>
                             </div>
@@ -251,11 +276,11 @@ if ($json_services == true) { //There are services of some sort
             $nextTrainNumbers = array(null, null, "2nd","3rd","4th","5th","6th","7th","8th","9th","10th"); //Display numbers for next trains (0 and 1 are the first 2 indexes, so null them)
             
             if ($delayed == true) {
-                $nextTrainTextStrings[] = "<table class='nextTrainsTable'><tr><td>$nextTrainNumbers[$index]&#9;$json_gbttBookedDepartureDisplay&#9;P$json_platform&#9;$json_destination</td><td id='nextTrainsTableDueLate'>$diff_NowAndExpected</td></tr></table>";
+                $nextTrainTextStrings[] = "<table class='nextTrainsTable'><tr><td>$nextTrainNumbers[$index]&#9;$json_std&#9;P$json_platform&#9;$json_destination</td><td id='nextTrainsTableDueLate'>$diff_NowAndExpected</td></tr></table>";
                 $nextTrainStringDelayed = true;
             }
             else {
-                $nextTrainTextStrings[] = "<table class='nextTrainsTable'><tr><td>$nextTrainNumbers[$index]&#9;$json_gbttBookedDepartureDisplay&#9;P$json_platform&#9;$json_destination</td><td id='nextTrainsTableDueOnTime'>$diff_NowAndExpected</td></tr></table>";
+                $nextTrainTextStrings[] = "<table class='nextTrainsTable'><tr><td>$nextTrainNumbers[$index]&#9;$json_std&#9;P$json_platform&#9;$json_destination</td><td id='nextTrainsTableDueOnTime'>$diff_NowAndExpected</td></tr></table>";
                 $nextTrainStringDelayed = false;
 
             }
@@ -270,7 +295,7 @@ if ($json_services == true) { //There are services of some sort
     } //End Foreach service
 
     if ($json_services == false || $servicesShown < 1) { //There are no services, or there are only non-train services.
-        $expDate = false;
+        $etdDate = false;
         $nowDate = false;
         $diff_NowAndExpected = false;
         $diff_SchedActual= false;
@@ -402,7 +427,7 @@ if ($json_services == true) { //There are services of some sort
 
 <div id="footer">
     <p>
-        PlatformDisplay.UK <?php echo date("Y"); ?> | PaulJRowland | <a href='https://github.com/pauljrowland/PlatformDisplay-UK' target='_blank'>Github</a> | <a href='https://www.realtimetrains.co.uk' target='_blank'>Realtime Trains</a> <a href='https://api.rtt.io' target='_blank'>API</a>
+        PlatformDisplay.UK <?php echo date("Y"); ?> | PaulJRowland | <a href='https://github.com/pauljrowland/PlatformDisplay-UK' target='_blank'>Github</a>
     </p>
 </div>
 
