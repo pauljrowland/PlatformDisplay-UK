@@ -4,7 +4,7 @@ function refresh( $time ){
     $current_url = $_SERVER[ 'REQUEST_URI' ];
     return header( "Refresh: " . $time . "; URL=$current_url" );
 }
-refresh( 30 );
+refresh( 45 );
 
 ?>
 
@@ -114,6 +114,7 @@ if ($json_services == true) { //There are services of some sort
 
         $json_serviceID = $s_service->serviceID ?? "Identity Unknown"; //Train identity (head code)
         $json_destination = $s_service->destination[0]->locationName ?? "Destination Unknown"; //All train calling destinations
+        $json_isCancelled = $s_service->isCancelled ?? "false";
         $json_platform = $s_service->platform ?? "-"; //Platform number. Set to "-" if unknown or a single platform station
         $json_operatorCode = $s_service->operatorCode ?? "Operator Code Unknown"; //Operator code, i.e. LD
         $json_operator = $s_service->operator ?? "Operator Name Unknown"; //Operator friendly name
@@ -125,7 +126,7 @@ if ($json_services == true) { //There are services of some sort
         $json_callingPoints = $s_service->subsequentCallingPoints[0]->callingPoint ?? "Where is is going?";
 
                     $json_gbttBookedDepartureNextDay = $s_service->locationDetail->gbttBookedDepartureNextDay ?? false; //Next day departure
-                    $json_realtimeArrivalActual = $s_service->locationDetail->std ?? false; //Has it arived?
+                    //$json_realtimeArrivalActual = $s_service->locationDetail->std ?? false; //Has it arived?
 
         $stdDate = date("Y-m-d"); //Get today's date
         $stdDate = "$stdDate-$json_std"; //Add on the scheduled time to the end of the date
@@ -147,7 +148,13 @@ if ($json_services == true) { //There are services of some sort
             if ($diff_SchedActual > 0) { //The difference between scheduled and expected is greater than 0 - the train is late.
                 $delayed = true; //Set delayed to true
                 if ($showDelayInfo == "true") { //The user has chosen to see this (as opposed to just flashing text). Add the delay onto the destination text.
-                    $json_destination = "$json_destination    (Exp: $json_etd)";
+                    if ($json_etd == "Delayed") {
+                        $json_destination = "$json_destination    (Delayed)";
+                    }
+                    else
+                    {
+                        $json_destination = "$json_destination    (Exp: $json_etd)";
+                    }
                 }
             }
             else { //The train is on time
@@ -159,17 +166,21 @@ if ($json_services == true) { //There are services of some sort
 
         }
         
-        if ($diff_NowAndExpected == 0 AND $json_realtimeArrivalActual == false) { //The train is likely to be approaching 
+        //if ($diff_NowAndExpected == 0 AND $json_realtimeArrivalActual == false) { //The train is likely to be approaching 
+        if ($diff_NowAndExpected == 0) { //The train is likely to be approaching 
             $diff_NowAndExpected = "Due";
         }
-        elseif ($diff_NowAndExpected == 1 AND $json_realtimeArrivalActual == false) { //The train is within 1 minute away, so may as well say it's Due
+        //elseif ($diff_NowAndExpected == 1 AND $json_realtimeArrivalActual == false) { //The train is within 1 minute away, so may as well say it's Due
+        elseif ($diff_NowAndExpected == 1) { //The train is within 1 minute away, so may as well say it's Due
             $diff_NowAndExpected = "Approaching";
         }
-        elseif ($json_realtimeArrivalActual == true) { //RTT has confirmed the train is in the platform
+        //elseif ($json_realtimeArrivalActual == true) { //RTT has confirmed the train is in the platform
+        elseif ($diff_NowAndExpected == 0 && $json_etd == $json_std) { //RTT has confirmed the train is in the platform
+
             $diff_NowAndExpected = "At Platform";
         }
-        elseif ($json_etd == "Delayed") { 
-            $diff_NowAndExpected = "Delayed";
+        elseif ($json_etd == "Delayed") { // There is a delay - but unknown how long
+            $diff_NowAndExpected = "Delayed - No ETA";
         }
         else {
             $diff_NowAndExpected = "$diff_NowAndExpected min"; //None of the above are correct - so show how many minutes there are remaining
@@ -185,8 +196,28 @@ if ($json_services == true) { //There are services of some sort
         elseif ($pltatformSet == true AND $platform != $json_platform) { //Is the train showing on the platform we selected (if not all)? If not, reset the index to 0 and try again
             $index--;
         }
+        elseif ($json_isCancelled == true){
+            $index--;
+        }
         elseif (($index == 1 AND $s_service->serviceType == "train")) { //We only care about trains, not rail replacement buses or ferries. Get the next train.
             $servicesShown++;
+
+//            // Service API Query
+//            $serviceApiUrl = "https://api1.raildata.org.uk/1010-service-details1_2/LDBWS/api/20220120/GetServiceDetails/$json_serviceID";
+//
+//            include("creds/creds.php"); //External password file
+//            $serciceOpts = [
+//                "http" => [
+//                    'method'  => 'GET',
+//                    'header' => 'x-apikey: '.$serviceAPIKey
+//                    ]
+//                ];
+//
+//            $serviceContext = stream_context_create($serviceOpts); //Get result
+//            $serviceJson = file_get_contents($serviceApiUrl, false, $serviceContext); //Convert to PHP JSON
+//            $serviceObj = json_decode($json); //Store PHP JSON as object  
+//
+//            $serviceJson_
 
 ?>
 
@@ -223,7 +254,7 @@ if ($json_services == true) { //There are services of some sort
                     <td id='callingAtLabel'>Info:</td>
                     <td id='callingAtText'>
                         <div class="scrolling-text-container">
-                            <div class="scrolling-text-inner" style="--marquee-speed: 30s; --direction:scroll-left" role="marquee">
+                            <div class="scrolling-text-inner" style="--marquee-speed: 45s; --direction:scroll-left" role="marquee">
                                 <div class="scrolling-text">
                                     <div class="scrolling-text-item">This is the <?php echo $json_operator;?> service from <?php echo $json_origin;?>.</div>
                                     <div class="scrolling-text-item">
@@ -232,25 +263,31 @@ if ($json_services == true) { //There are services of some sort
                                             $callingPointIndex = 1;
                                             $callingAtListStr = "Calling at ";
                                             foreach ($json_callingPoints as $json_calling_point) {
+
+                                                $callingLocationName = $json_calling_point->locationName;
+                                                if ($json_calling_point->et == "On time") {
+                                                    $callingLocationTime = $json_calling_point->st;
+                                                }
+                                                else{
+                                                    $callingLocationTime = $json_calling_point->et;
+                                                }
+
                                                 if (count($json_callingPoints) == 1) {
-                                                    $callingLocationName = $json_calling_point->locationName;
-                                                    $callingAtListStr .= "$callingLocationName only.";
+
+                                                    $callingAtListStr .= "$callingLocationName ($callingLocationTime) only.";
                                                 }
                                                 elseif ($callingPointIndex < count($json_callingPoints)) {
                                                     if ($callingPointIndex == 1) {
-                                                        $callingLocationName = $json_calling_point->locationName;
-                                                        $callingAtListStr .= "$callingLocationName";
+                                                        $callingAtListStr .= "$callingLocationName ($callingLocationTime)";
                                                         $callingPointIndex++;
                                                     }
-                                                    else {                                           
-                                                        $callingLocationName = $json_calling_point->locationName;
-                                                        $callingAtListStr .= ", $callingLocationName";
+                                                    else {
+                                                        $callingAtListStr .= ", $callingLocationName ($callingLocationTime)";
                                                         $callingPointIndex++;
                                                     }
                                                 }
                                                 else {
-                                                    $callingLocationName = $json_calling_point->locationName;
-                                                    $callingAtListStr .= " and $callingLocationName.";
+                                                    $callingAtListStr .= " and $callingLocationName ($callingLocationTime).";
                                                 }
                                             }
 
@@ -259,7 +296,7 @@ if ($json_services == true) { //There are services of some sort
                                         ?>
                                     </div>
                                     <?php if ($json_length > 0) { echo "<div class='scrolling-text-item'>This train is made up of $json_length carriages.</div>"; }?>
-                                    <div class="scrolling-text-item">Some class of seating is available.</div>
+                                    <!--<div class="scrolling-text-item">Some class of seating is available.</div>-->
                                 </div>
                             </div>
                         </div>
@@ -370,37 +407,44 @@ if ($json_services == true) { //There are services of some sort
 
                         $dateDisplay = date("l jS F Y");
 
-                        if ($json_name AND ($json_services == true || $servicesShown > 0)) { //If the station is valid
+                        if ($json_isCancelled == true) {
+                            $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$json_name</td></tr></table>\",";
+                            $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>Cancelled</td></tr></table>\",";
+                        }
+                        elseif ($json_name AND ($json_services == true || $servicesShown > 0)) { //If the station is valid
 
-                            $wordlist[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$json_name</td></tr></table>\",";
-                            $wordlist[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$dateDisplay</td></tr></table>\",";
+                            $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$json_name</td></tr></table>\",";
+                            $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$dateDisplay</td></tr></table>\",";
 
                             $changeTrainTextStringIndex = 0;
 
                             foreach ($nextTrainTextStrings as $nextTrainTextString) {
-                                    $changeTrainTextStringIndex++;
-                                    if ($changeTrainTextStringIndex < count($nextTrainTextStrings)) {
-                                        $wordlist[] = "\"$nextTrainTextString\",";
-                                    }
-                                    else {
-                                        $wordlist[] =  "\"$nextTrainTextString\"";
-                                    }
+                              //      $changeTrainTextStringIndex++;
+                              //      if ($changeTrainTextStringIndex < count($nextTrainTextStrings)) {
+                                        $btmScrItems[] = "\"$nextTrainTextString\",";
+                              //      }
+                               //     else {
+                               //         $btmScrItems[] =  "\"$nextTrainTextString\"";
+                                //    }
                                     
                             }
                         }
                         else {
 
-                            $wordlist[] = "\"<table class='nextTrainsTableStaticText'><tr><td>Invalid Station Code: '$station'</td></tr></table>\",";
-                            $wordlist[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$dateDisplay</td></tr></table>\",";
+                            $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>Invalid Station Code: '$station'</td></tr></table>\",";
+                            $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$dateDisplay</td></tr></table>\",";
 
                         }
-
+                      
+                        $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>Please ensure that you do not leave personal</td></tr></table>\",";
+                        $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>belongings unattended.</td></tr></table>\",";
+                        $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>&nbsp;</td></tr></table>\",";
 ?>
 
                     <script> 
                     
-                        const words = [<?php foreach ($wordlist as $word) {
-                            echo $word;
+                        const words = [<?php foreach ($btmScrItems as $btmScrItem) {
+                            echo $btmScrItem;
                         }?>];
                             
                         let changeTrainTextStringindex = 0; 
@@ -410,7 +454,7 @@ if ($json_services == true) { //There are services of some sort
                             document.getElementById("wordContainer").innerHTML = words[changeTrainTextStringindex]; 
                         } 
 
-                        setInterval(changeTrainTextString, 3000); // Change word every 2 seconds 
+                        setInterval(changeTrainTextString, 2000); // Change word every 2 seconds 
                         
                     </script>
 
