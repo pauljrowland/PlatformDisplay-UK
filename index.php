@@ -38,23 +38,23 @@ else {
     $pltatformSet = true;
 }
 
-if((!isset($_GET['delayinfo'] )) || ($_GET['delayinfo'] == null || $_GET['delayinfo'] == '' || $_GET['delayinfo'] == 'false')) {
-    $showDelayInfo = false;
+if((!isset($_GET['showexpected'] )) || ($_GET['showexpected'] == null || $_GET['showexpected'] == '' || $_GET['showexpected'] == 'false')) {
+    $showExpectedInfo = false;
 }
-elseif ($_GET['delayinfo'] == "true" ) {
-    $showDelayInfo = $_GET['delayinfo'];
+elseif ($_GET['showexpected'] == "true" ) {
+    $showExpectedInfo = $_GET['showexpected'];
 }
 else {
-    $showDelayInfo = true;
+    $showExpectedInfo = true;
 }
 
 ?>
 
-<a href="?station=ncl<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">NCL</a> - <a href="?station=kgx<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">KGX</a> - <a href="?station=asl<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">ASL</a> - <a href="?station=nwh<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">NWH</a> - <a href="?station=car<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">CAR</a> - <a href="?station=sun<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">SUN</a> - <a href="?station=nlw<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">NLW</a> - <a href="?station=zzz<?php if ($showDelayInfo == true) { echo "&delayinfo=true";} ?>">ZZZ</a><br><br>
+<a href="?station=ncl<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">NCL</a> - <a href="?station=kgx<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">KGX</a> - <a href="?station=asl<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">ASL</a> - <a href="?station=nwh<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">NWH</a> - <a href="?station=car<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">CAR</a> - <a href="?station=sun<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">SUN</a> - <a href="?station=nlw<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">NLW</a> - <a href="?station=zzz<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">ZZZ</a><br><br>
 <form action=".">
     Manual Station Code: <input name="station" id="station" type="text" required value="<?php echo $station;?>"><br>
     Platform Number (leave blank for all): <input name="platform" id="platform" type="text" value="<?php echo $platform;?>"><br>
-    Show expected time on destination label: <input name="delayinfo" id="delayinfo" type="checkbox" value="true" <?php if ($showDelayInfo == true) { echo "checked";} ?>>
+    Always show expected time on destination label: <input name="showexpected" id="showexpected" type="checkbox" value="true" <?php if ($showExpectedInfo == true) { echo "checked";} ?>>
     <input type="Submit">
 </form>
 
@@ -76,7 +76,7 @@ $opts = [
     ];
 
 $context = stream_context_create($opts); //Get result
-$json = file_get_contents($apiUrl, false, $context); //Convert to PHP JSON
+$json = @file_get_contents($apiUrl, false, $context); //Convert to PHP JSON
 $obj = json_decode($json); //Store PHP JSON as object
 
 $json_name = $obj->locationName ?? false; // Station Name
@@ -134,20 +134,20 @@ if ($json_services == true) { //There are services of some sort
         $etdDate = date("Y-m-d"); //Get today's date
         $etdDate = "$etdDate $json_etd"; //Add on the expected time to the end of the date
         $etdDateObj = date("Y-m-d H:i", strtotime($etdDate)); //Convert to date string
-        $nowDate = date("Y-m-d-Hi"); // Timestamp now
+        $nowDate = date("Y-m-d-H:i"); // Timestamp now
         $nowDateObj = date("Y-m-d H:i", strtotime($nowDate)); //Convert the now timestamp to a date string too
 
         if ($etdDateObj == true) { //There is an expected time - let's work out if it's delayed ot not.
             
-            $diff_SchedActual = abs(strtotime($stdDateObj) - strtotime($etdDateObj)); 
+            $diff_SchedActual = abs(strtotime($stdDateObj) - abs(strtotime($etdDateObj))); 
             $diff_SchedActual= round($diff_SchedActual /60,2);//->format('%i');
 
-            $diff_NowAndExpected = abs(strtotime($etdDateObj) - strtotime($nowDateObj));
+            $diff_NowAndExpected = abs(strtotime($etdDateObj) - abs(strtotime($nowDateObj)));
             $diff_NowAndExpected = round($diff_NowAndExpected /60,2);//->format('%i');
 
             if ($diff_SchedActual > 0) { //The difference between scheduled and expected is greater than 0 - the train is late.
                 $delayed = true; //Set delayed to true
-                if ($showDelayInfo == "true") { //The user has chosen to see this (as opposed to just flashing text). Add the delay onto the destination text.
+                if (($showExpectedInfo == "true") || ($showExpectedInfo != "true" && $delayed == true)) { //The user has chosen to see this (as opposed to just flashing text). Add the delay onto the destination text.
                     if ($json_etd == "Delayed") {
                         $json_destination = "$json_destination    (Delayed)";
                     }
@@ -159,26 +159,22 @@ if ($json_services == true) { //There are services of some sort
             }
             else { //The train is on time
                 $delayed = false;
-                if ($showDelayInfo == "true") { //The user has chosen to see this (as opposed to just green). Add that it is on time onto the destination text.
+                if ($showExpectedInfo == "true") { //The user has chosen to see this (as opposed to just green). Add that it is on time onto the destination text.
                     $json_destination = "$json_destination    (On Time)";
                 }
             }
 
         }
         
-        //if ($diff_NowAndExpected == 0 AND $json_realtimeArrivalActual == false) { //The train is likely to be approaching 
-        if ($diff_NowAndExpected == 0) { //The train is likely to be approaching 
+        if ($diff_NowAndExpected <= 0) { //The train is within 1 minute away, so may as well say it's Due
             $diff_NowAndExpected = "Due";
         }
-        //elseif ($diff_NowAndExpected == 1 AND $json_realtimeArrivalActual == false) { //The train is within 1 minute away, so may as well say it's Due
-        elseif ($diff_NowAndExpected == 1) { //The train is within 1 minute away, so may as well say it's Due
-            $diff_NowAndExpected = "Approaching";
-        }
-        //elseif ($json_realtimeArrivalActual == true) { //RTT has confirmed the train is in the platform
-        elseif ($diff_NowAndExpected == 0 && $json_etd == $json_std) { //RTT has confirmed the train is in the platform
-
-            $diff_NowAndExpected = "At Platform";
-        }
+        //elseif (abs(strtotime($etdDateObj)) < abs(strtotime($nowDateObj))) {
+        //    $diff_NowAndExpected = "Due";
+        //    $delayed = true;
+        //    $json_destination = $s_service->destination[0]->locationName; //Reset the destination as the train is now arriving after the estimated time - so is late.
+        //    $json_destination = "$json_destination    (Late)";
+        //}
         elseif ($json_etd == "Delayed") { // There is a delay - but unknown how long
             $diff_NowAndExpected = "Delayed - No ETA";
         }
@@ -186,13 +182,10 @@ if ($json_services == true) { //There are services of some sort
             $diff_NowAndExpected = "$diff_NowAndExpected min"; //None of the above are correct - so show how many minutes there are remaining
         }
         
-        //if ($json_operatorCode == "LD") {
-        //    $json_operator = "Lumo";
-        //} //Lumo shows on RTT as unknown, fix this.
         
         if ($index > 0 AND $s_service->serviceType != "train") { //Next train is say a bus, don't display it - so reset the index to 0, meaning the next real train shows
             $index--;
-        } 
+        }
         elseif ($pltatformSet == true AND $platform != $json_platform) { //Is the train showing on the platform we selected (if not all)? If not, reset the index to 0 and try again
             $index--;
         }
@@ -201,23 +194,6 @@ if ($json_services == true) { //There are services of some sort
         }
         elseif (($index == 1 AND $s_service->serviceType == "train")) { //We only care about trains, not rail replacement buses or ferries. Get the next train.
             $servicesShown++;
-
-//            // Service API Query
-//            $serviceApiUrl = "https://api1.raildata.org.uk/1010-service-details1_2/LDBWS/api/20220120/GetServiceDetails/$json_serviceID";
-//
-//            include("creds/creds.php"); //External password file
-//            $serciceOpts = [
-//                "http" => [
-//                    'method'  => 'GET',
-//                    'header' => 'x-apikey: '.$serviceAPIKey
-//                    ]
-//                ];
-//
-//            $serviceContext = stream_context_create($serviceOpts); //Get result
-//            $serviceJson = file_get_contents($serviceApiUrl, false, $serviceContext); //Convert to PHP JSON
-//            $serviceObj = json_decode($json); //Store PHP JSON as object  
-//
-//            $serviceJson_
 
 ?>
 
@@ -296,7 +272,6 @@ if ($json_services == true) { //There are services of some sort
                                         ?>
                                     </div>
                                     <?php if ($json_length > 0) { echo "<div class='scrolling-text-item'>This train is made up of $json_length carriages.</div>"; }?>
-                                    <!--<div class="scrolling-text-item">Some class of seating is available.</div>-->
                                 </div>
                             </div>
                         </div>
@@ -413,20 +388,13 @@ if ($json_services == true) { //There are services of some sort
                         }
                         elseif ($json_name AND ($json_services == true || $servicesShown > 0)) { //If the station is valid
 
-                            $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$json_name</td></tr></table>\",";
+                            $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr'><td>$json_name</td></tr></table>\",";
                             $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$dateDisplay</td></tr></table>\",";
 
                             $changeTrainTextStringIndex = 0;
 
                             foreach ($nextTrainTextStrings as $nextTrainTextString) {
-                              //      $changeTrainTextStringIndex++;
-                              //      if ($changeTrainTextStringIndex < count($nextTrainTextStrings)) {
                                         $btmScrItems[] = "\"$nextTrainTextString\",";
-                              //      }
-                               //     else {
-                               //         $btmScrItems[] =  "\"$nextTrainTextString\"";
-                                //    }
-                                    
                             }
                         }
                         else {
@@ -454,7 +422,7 @@ if ($json_services == true) { //There are services of some sort
                             document.getElementById("wordContainer").innerHTML = words[changeTrainTextStringindex]; 
                         } 
 
-                        setInterval(changeTrainTextString, 2000); // Change word every 2 seconds 
+                        setInterval(changeTrainTextString, 3000); // Change word every 3 seconds 
                         
                     </script>
 

@@ -262,6 +262,10 @@ div.topOfScreenText > * {
     white-space: nowrap;
 }
 
+.nextTrainsTable td{
+    font-size:30px;
+}
+
 .nextTrainsTableStaticText {
     width:100%;
 /*    white-space: nowrap;*/
