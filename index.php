@@ -388,7 +388,7 @@ if ($json_services == true) { //There are services of some sort
                         }
                         elseif ($json_name AND ($json_services == true || $servicesShown > 0)) { //If the station is valid
 
-                            $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr'><td>$json_name</td></tr></table>\",";
+                            $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$json_name</td></tr></table>\",";
                             $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$dateDisplay</td></tr></table>\",";
 
                             $changeTrainTextStringIndex = 0;
