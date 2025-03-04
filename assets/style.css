@@ -3,6 +3,11 @@
     src: url(dotmatrix.ttf);
 }
 
+html{
+    overflow-x:hidden;
+    height: 100%;
+  }
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -23,7 +28,7 @@ body {
     text-align: center;
     margin-top:5px;
     color: rgba(255,255,255,0.4);
-    text-shadow: 0 -2px  rgba(0,0,0,0.6);
+    text-shadow: 0 -2px  rgba(0, 0, 0, 0.792);
     font-size: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     overflow: hidden;
@@ -284,7 +289,7 @@ div.topOfScreenText > * {
 
 
 #footer {
-    position: fixed;
+    position: absolute;
     left: 0;
     bottom: 0;
     width: 100%;
