@@ -114,7 +114,8 @@ if ($json_services == true) { //There are services of some sort
 
         $json_serviceID = $s_service->serviceID ?? "Identity Unknown"; //Train identity (head code)
         $json_destination = $s_service->destination[0]->locationName ?? "Destination Unknown"; //All train calling destinations
-        $json_isCancelled = $s_service->isCancelled ?? "false";
+        $json_isCancelled = $s_service->isCancelled ?? false;
+        $json_cancelReason = $s_service->cancelReason ?? false;
         $json_platform = $s_service->platform ?? "-"; //Platform number. Set to "-" if unknown or a single platform station
         $json_operatorCode = $s_service->operatorCode ?? "Operator Code Unknown"; //Operator code, i.e. LD
         $json_operator = $s_service->operator ?? "Operator Name Unknown"; //Operator friendly name
@@ -145,7 +146,11 @@ if ($json_services == true) { //There are services of some sort
             $diff_NowAndExpected = abs(strtotime($etdDateObj) - abs(strtotime($nowDateObj)));
             $diff_NowAndExpected = round($diff_NowAndExpected /60,2);//->format('%i');
 
-            if ($diff_SchedActual > 0) { //The difference between scheduled and expected is greater than 0 - the train is late.
+            if ($json_isCancelled == true){
+                $json_destination = "$json_destination";
+                $delayed = false; // Set delayed to false to prevent errors when a train is cancelled.
+            }
+            elseif ($diff_SchedActual > 0) { //The difference between scheduled and expected is greater than 0 - the train is late.
                 $delayed = true; //Set delayed to true
                 if (($showExpectedInfo == "true") || ($showExpectedInfo != "true" && $delayed == true)) { //The user has chosen to see this (as opposed to just flashing text). Add the delay onto the destination text.
                     if ($json_etd == "Delayed") {
@@ -169,14 +174,11 @@ if ($json_services == true) { //There are services of some sort
         if ($diff_NowAndExpected <= 0) { //The train is within 1 minute away, so may as well say it's Due
             $diff_NowAndExpected = "Due";
         }
-        //elseif (abs(strtotime($etdDateObj)) < abs(strtotime($nowDateObj))) {
-        //    $diff_NowAndExpected = "Due";
-        //    $delayed = true;
-        //    $json_destination = $s_service->destination[0]->locationName; //Reset the destination as the train is now arriving after the estimated time - so is late.
-        //    $json_destination = "$json_destination    (Late)";
-        //}
         elseif ($json_etd == "Delayed") { // There is a delay - but unknown how long
             $diff_NowAndExpected = "Delayed - No ETA";
+        }
+        elseif ($json_isCancelled == true){
+            $diff_NowAndExpected = "Cancelled";
         }
         else {
             $diff_NowAndExpected = "$diff_NowAndExpected min"; //None of the above are correct - so show how many minutes there are remaining
@@ -187,9 +189,6 @@ if ($json_services == true) { //There are services of some sort
             $index--;
         }
         elseif ($pltatformSet == true AND $platform != $json_platform) { //Is the train showing on the platform we selected (if not all)? If not, reset the index to 0 and try again
-            $index--;
-        }
-        elseif ($json_isCancelled == true){
             $index--;
         }
         elseif (($index == 1 AND $s_service->serviceType == "train")) { //We only care about trains, not rail replacement buses or ferries. Get the next train.
@@ -220,7 +219,7 @@ if ($json_services == true) { //There are services of some sort
                     <td id='nextTrainTime'><?php echo $json_std; ?></td>
                     <td id='nextTrainPlatform'>P<?php echo $json_platform;?></td>
                     <td id='nextTrainDest'><?php echo $json_destination;?></td>
-                    <td id='nextTrainExpected'<?php if ($delayed == true) {echo " style='color:red;' class='blink_me'>";} else {echo ">";}; echo $diff_NowAndExpected;?></td>
+                    <td id='nextTrainExpected'<?php if ($delayed == true || $json_isCancelled == true) {echo " style='color:red;' class='blink_me'>";} else {echo ">";}; echo $diff_NowAndExpected;?></td>
                 </tr>
             </table>
         </div>
@@ -232,46 +231,55 @@ if ($json_services == true) { //There are services of some sort
                         <div class="scrolling-text-container">
                             <div class="scrolling-text-inner" style="--marquee-speed: 45s; --direction:scroll-left" role="marquee">
                                 <div class="scrolling-text">
-                                    <div class="scrolling-text-item">This is the <?php echo $json_operator;?> service from <?php echo $json_origin;?>.</div>
-                                    <div class="scrolling-text-item">
-                                        <?php
 
-                                            $callingPointIndex = 1;
-                                            $callingAtListStr = "Calling at ";
-                                            foreach ($json_callingPoints as $json_calling_point) {
+                                    <?php 
 
-                                                $callingLocationName = $json_calling_point->locationName;
-                                                if ($json_calling_point->et == "On time") {
-                                                    $callingLocationTime = $json_calling_point->st;
-                                                }
-                                                else{
-                                                    $callingLocationTime = $json_calling_point->et;
-                                                }
+                                        if ($json_isCancelled == true){
+                                            $callingAtListStr = "<div class=\"scrolling-text-item\">$json_cancelReason.</div>";
+                                        }
+                                        else { ?>
 
-                                                if (count($json_callingPoints) == 1) {
+                                        <div class="scrolling-text-item">This is the <?php echo $json_operator;?> service from <?php echo $json_origin;?>.</div>
+                                        <div class="scrolling-text-item">
+                                            <?php
 
-                                                    $callingAtListStr .= "$callingLocationName ($callingLocationTime) only.";
-                                                }
-                                                elseif ($callingPointIndex < count($json_callingPoints)) {
-                                                    if ($callingPointIndex == 1) {
-                                                        $callingAtListStr .= "$callingLocationName ($callingLocationTime)";
-                                                        $callingPointIndex++;
+                                                $callingPointIndex = 1;
+                                                $callingAtListStr = "Calling at ";
+                                                foreach ($json_callingPoints as $json_calling_point) {
+
+                                                    $callingLocationName = $json_calling_point->locationName;
+                                                    if ($json_calling_point->et == "On time") {
+                                                        $callingLocationTime = $json_calling_point->st;
+                                                    }
+                                                    else{
+                                                        $callingLocationTime = $json_calling_point->et;
+                                                    }
+
+                                                    if (count($json_callingPoints) == 1) {
+
+                                                        $callingAtListStr .= "$callingLocationName ($callingLocationTime) only.";
+                                                    }
+                                                    elseif ($callingPointIndex < count($json_callingPoints)) {
+                                                        if ($callingPointIndex == 1) {
+                                                            $callingAtListStr .= "$callingLocationName ($callingLocationTime)";
+                                                            $callingPointIndex++;
+                                                        }
+                                                        else {
+                                                            $callingAtListStr .= ", $callingLocationName ($callingLocationTime)";
+                                                            $callingPointIndex++;
+                                                        }
                                                     }
                                                     else {
-                                                        $callingAtListStr .= ", $callingLocationName ($callingLocationTime)";
-                                                        $callingPointIndex++;
+                                                        $callingAtListStr .= " and $callingLocationName ($callingLocationTime).";
                                                     }
                                                 }
-                                                else {
-                                                    $callingAtListStr .= " and $callingLocationName ($callingLocationTime).";
-                                                }
-                                            }
+                                        }
 
-                                            echo $callingAtListStr;
+                                        echo $callingAtListStr;
 
                                         ?>
                                     </div>
-                                    <?php if ($json_length > 0) { echo "<div class='scrolling-text-item'>This train is made up of $json_length carriages.</div>"; }?>
+                                    <?php if ($json_length > 0 && $json_isCancelled == false) { echo "<div class='scrolling-text-item'>This train is made up of $json_length carriages.</div>"; }?>
                                 </div>
                             </div>
                         </div>
