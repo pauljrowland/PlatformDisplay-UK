@@ -9,14 +9,14 @@ body {
 
 #displayBoardWrapper {
     display: block;
-    width:95%;
-    min-width: 1250px; /* Set at this as "Rhoose Cardiff International Airport" is the longest station name (that's not Llanfair: */
+    width:75%;
+    min-width: 1024px; /* Set at this as "Rhoose Cardiff International Airport" is the longest station name (that's not Llanfair: */
     background-color: silver;
     margin: auto;
     padding:10px;
     border-radius: 25px;
     border: 1px solid silver;
-    height:360px;
+    height:310px;
 }
 
 .topOfScreenText {
@@ -38,25 +38,25 @@ div.topOfScreenText > * {
 
 #displayBoardInnerWrapper {
     background-color: black;
-    margin-top:10px;
+    margin-top:7px;
     margin-bottom:5px;
     width:100%;
-    height:240px;
+    height:210px;
     border-radius: 25px;
 }
 
 
 #clock {
     background-color: black;
-    margin-bottom:0px;
     margin-left: auto;
     margin-right: auto;
-    margin-bottom: 10px;
+    margin-bottom: auto;
+    padding-top:15px;
+    padding-bottom:5px;
     width:400px;
-    height:80px;
+    height:40px;
     text-align: center;
-    font-size:45px;
-    line-height: 75px;
+    font-size:25px;
     color: orange;
     vertical-align: middle;
     border-bottom-left-radius: 20px;
@@ -70,7 +70,7 @@ div.topOfScreenText > * {
 }
 
 .board-top {
-    height: 80px;
+    height: 70px;
     width:98%;
     margin-left: auto;
     margin-right: auto;
@@ -81,9 +81,7 @@ div.topOfScreenText > * {
 
 .board-top div {
     width: 98%;
-    height: 100px;
     margin: 0;
-    line-height: 50px;
 }
 
 .board-top table {
@@ -92,18 +90,18 @@ div.topOfScreenText > * {
 }
 
 .board-top td {
-    font-size:40px;
+    font-size:30px;
 }
 
 #nextTrainTime {
-    width:140px;
+    width:120px;
     margin: 0;
     text-align: left;
     color:#f01c5c;
 }
 
 #nextTrainPlatform {
-    width:130px;
+    width:80px;
     text-align: left;
     color:lightgray;
 }
@@ -136,7 +134,7 @@ div.topOfScreenText > * {
 
 
 .board-middle {
-    height: 80px;
+    height: 70px;
     width:98%;
     margin-left: auto;
     margin-right: auto;
@@ -167,16 +165,16 @@ div.topOfScreenText > * {
 }
 
 #callingAtLabel{
-    font-size:40px;
+    font-size:35px;
     text-align: left;
     color:#ff0000;
     padding-left:5px;
     padding-right:25px;
+    height:100%;
 }
 
 #callingAtText{
     color:#ffc000;
-    height: 95%;
     width:100%;
 }
 
@@ -191,7 +189,7 @@ div.topOfScreenText > * {
 /* Inner container styles */
 .scrolling-text-inner {
     white-space: nowrap;
-    font-size:40px;
+    font-size:30px;
     width:100%;
 }
 
@@ -204,7 +202,6 @@ div.topOfScreenText > * {
 .scrolling-text-item {
     padding-left: 0;
     padding-right:50px;
-    padding-top:10px;
     width:100%;
 }
 
@@ -224,7 +221,7 @@ div.topOfScreenText > * {
 }
 
 .board-bottom {
-    height: 80px;
+    height: 70px;
     width:98%;
     margin-left: auto;
     margin-right: auto;
@@ -235,7 +232,6 @@ div.topOfScreenText > * {
 .board-bottom div {    
     width:100%;
     height: 100%;
-    line-height: 50px;
 }
 
 .board-bottom table {
@@ -247,13 +243,11 @@ div.topOfScreenText > * {
 }
 
 .board-bottom td {
-    font-size:40px;
+    font-size:35px;
     width:100%;
 }
 
 #boardBottomText{
-    display:block;
-    width:100%;
     color:lightblue;
 }
 
@@ -268,7 +262,6 @@ div.topOfScreenText > * {
 
 .nextTrainsTableStaticText {
     width:100%;
-/*    white-space: nowrap;*/
     text-align: center;
 }
 
