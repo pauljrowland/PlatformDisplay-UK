@@ -175,7 +175,7 @@ if ($json_services == true) { //There are services of some sort
             $diff_NowAndExpected = "Due";
         }
         elseif ($json_etd == "Delayed") { // There is a delay - but unknown how long
-            $diff_NowAndExpected = "Delayed - No ETA";
+            $diff_NowAndExpected = "No ETA";
         }
         elseif ($json_isCancelled == true){
             $diff_NowAndExpected = "Cancelled";
