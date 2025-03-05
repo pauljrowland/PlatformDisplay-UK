@@ -296,7 +296,11 @@ if ($json_services == true) { //There are services of some sort
             $nextTrainNumbers = array(null, null, "2nd","3rd","4th","5th","6th","7th","8th","9th","10th"); //Display numbers for next trains (0 and 1 are the first 2 indexes, so null them)
             
             if ($delayed == true) {
-                $nextTrainTextStrings[] = "<table class='nextTrainsTable'><tr><td>$nextTrainNumbers[$index]&#9;$json_std&#9;P$json_platform&#9;$json_destination</td><td id='nextTrainsTableDueLate'>$diff_NowAndExpected</td></tr></table>";
+                $nextTrainTextStrings[] = "<table class='nextTrainsTable'><tr><td>$nextTrainNumbers[$index]&#9;$json_std&#9;P$json_platform&#9;$json_destination</td><td id='nextTrainsTableDueLate' class='blink_me'>$diff_NowAndExpected</td></tr></table>";
+                $nextTrainStringDelayed = true;
+            }
+            elseif ($json_isCancelled == true) {
+                $nextTrainTextStrings[] = "<table class='nextTrainsTable'><tr><td>$nextTrainNumbers[$index]&#9;$json_std&#9;P$json_platform&#9;$json_destination</td><td id='nextTrainsTableDueLate' class='blink_me'>Cancelled</td></tr></table>";
                 $nextTrainStringDelayed = true;
             }
             else {
@@ -390,19 +394,18 @@ if ($json_services == true) { //There are services of some sort
 
                         $dateDisplay = date("l jS F Y");
 
-                        if ($json_isCancelled == true) {
-                            $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$json_name</td></tr></table>\",";
-                            $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>Cancelled</td></tr></table>\",";
-                        }
-                        elseif ($json_name AND ($json_services == true || $servicesShown > 0)) { //If the station is valid
+                        if ($json_name AND ($json_services == true || $servicesShown > 0)) { //If the station is valid
 
                             $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$json_name</td></tr></table>\",";
                             $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>$dateDisplay</td></tr></table>\",";
 
                             $changeTrainTextStringIndex = 0;
 
-                            foreach ($nextTrainTextStrings as $nextTrainTextString) {
-                                        $btmScrItems[] = "\"$nextTrainTextString\",";
+                            if (@$nextTrainTextStrings) {
+
+                                foreach ($nextTrainTextStrings as $nextTrainTextString) {
+                                            $btmScrItems[] = "\"$nextTrainTextString\",";
+                                }
                             }
                         }
                         else {
