@@ -446,8 +446,6 @@ if ($json_services == true) { //There are services of some sort
     </div> <!-- End displayBoardInnerWrapper DIV -->
 </div> <!-- End displayBoardWrapper DIV -->
 
-<br /><br /><br /><br /><br />
-
 <div id="footer">
     <p>
         PlatformDisplay.UK <?php echo date("Y"); ?> | PaulJRowland | <a href='https://github.com/pauljrowland/PlatformDisplay-UK' target='_blank'>Github</a>
