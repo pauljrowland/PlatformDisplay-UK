@@ -294,6 +294,8 @@ div.topOfScreenText > * {
     color: white;
     text-align: center;
     line-height: 8px;
+    display:block; 
+
   }
 
   #footer  * {
