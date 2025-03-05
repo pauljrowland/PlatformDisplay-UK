@@ -17,6 +17,8 @@ refresh( 45 );
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
     <link rel="manifest" href="/assets/favicon/site.webmanifest">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
 </head>
 <body>
 
@@ -52,9 +54,9 @@ else {
 
 <a href="?station=ncl<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">NCL</a> - <a href="?station=kgx<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">KGX</a> - <a href="?station=asl<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">ASL</a> - <a href="?station=nwh<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">NWH</a> - <a href="?station=car<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">CAR</a> - <a href="?station=sun<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">SUN</a> - <a href="?station=nlw<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">NLW</a> - <a href="?station=zzz<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">ZZZ</a><br><br>
 <form action=".">
-    Manual Station Code: <input name="station" id="station" type="text" required value="<?php echo $station;?>"><br>
-    Platform Number (leave blank for all): <input name="platform" id="platform" type="text" value="<?php echo $platform;?>"><br>
-    Always show expected time on destination label: <input name="showexpected" id="showexpected" type="checkbox" value="true" <?php if ($showExpectedInfo == true) { echo "checked";} ?>>
+    Manual Station Code: <input name="station" id="station" type="text" required value="<?php echo $station;?>" aria-label="StationCode"><br>
+    Platform Number (leave blank for all): <input name="platform" id="platform" type="text" value="<?php echo $platform;?>" aria-label="Platform"><br>
+    Always show expected time on destination label: <input name="showexpected" id="showexpected" type="checkbox" value="true" <?php if ($showExpectedInfo == true) { echo "checked";} ?> aria-label="ShowExpected">
     <input type="Submit">
 </form>
 
@@ -229,7 +231,7 @@ if ($json_services == true) { //There are services of some sort
                     <td id='callingAtLabel'>Info:</td>
                     <td id='callingAtText'>
                         <div class="scrolling-text-container">
-                            <div class="scrolling-text-inner" style="--marquee-speed: 45s; --direction:scroll-left" role="marquee">
+                            <div class="scrolling-text-inner" id="scroll" role="marquee">
                                 <div class="scrolling-text">
                                     <?php 
 
@@ -456,7 +458,7 @@ if ($json_services == true) { //There are services of some sort
             </table>
         </div>
         <div id="clock">
-        <script src="/assets/clock.js"></script>
+        <script src="/assets/clock.js" ></script>
     </div>
     </div> <!-- End displayBoardInnerWrapper DIV -->
 </div> <!-- End displayBoardWrapper DIV -->

@@ -200,6 +200,10 @@ div.topOfScreenText > * {
     width:100%;
 }
 
+#scroll {
+    --marquee-speed: 45s;
+    --direction:scroll-left;
+}
 /* Text styles */
 .scrolling-text {
     display:flex;
