@@ -231,55 +231,53 @@ if ($json_services == true) { //There are services of some sort
                         <div class="scrolling-text-container">
                             <div class="scrolling-text-inner" style="--marquee-speed: 45s; --direction:scroll-left" role="marquee">
                                 <div class="scrolling-text">
-
                                     <?php 
 
                                         if ($json_isCancelled == true){
-                                            $callingAtListStr = "<div class=\"scrolling-text-item\">$json_cancelReason.</div>";
+                                            $callingAtListStr = "<div class=\"scrolling-text-item\">We are sorry to announce that the $json_operator service to $json_destination has been cancelled.</div>";
+                                            $callingAtListStr .= "<div class=\"scrolling-text-item\">$json_cancelReason.";
                                         }
-                                        else { ?>
+                                        else {
 
-                                        <div class="scrolling-text-item">This is the <?php echo $json_operator;?> service from <?php echo $json_origin;?>.</div>
-                                        <div class="scrolling-text-item">
-                                            <?php
+                                            echo "<div class='scrolling-text-item'>This is the $json_operator service from $json_origin.</div>";
+                                            echo "\n\t\t\t\t\t\t\t\t\t\t<div class='scrolling-text-item'>\n";
+                                            $callingPointIndex = 1;
+                                            $callingAtListStr = "Calling at ";
+                                            foreach ($json_callingPoints as $json_calling_point) {
 
-                                                $callingPointIndex = 1;
-                                                $callingAtListStr = "Calling at ";
-                                                foreach ($json_callingPoints as $json_calling_point) {
+                                                $callingLocationName = $json_calling_point->locationName;
+                                                if ($json_calling_point->et == "On time") {
+                                                    $callingLocationTime = $json_calling_point->st;
+                                                }
+                                                else{
+                                                    $callingLocationTime = $json_calling_point->et;
+                                                }
 
-                                                    $callingLocationName = $json_calling_point->locationName;
-                                                    if ($json_calling_point->et == "On time") {
-                                                        $callingLocationTime = $json_calling_point->st;
-                                                    }
-                                                    else{
-                                                        $callingLocationTime = $json_calling_point->et;
-                                                    }
+                                                if (count($json_callingPoints) == 1) {
 
-                                                    if (count($json_callingPoints) == 1) {
-
-                                                        $callingAtListStr .= "$callingLocationName ($callingLocationTime) only.";
-                                                    }
-                                                    elseif ($callingPointIndex < count($json_callingPoints)) {
-                                                        if ($callingPointIndex == 1) {
-                                                            $callingAtListStr .= "$callingLocationName ($callingLocationTime)";
-                                                            $callingPointIndex++;
-                                                        }
-                                                        else {
-                                                            $callingAtListStr .= ", $callingLocationName ($callingLocationTime)";
-                                                            $callingPointIndex++;
-                                                        }
+                                                    $callingAtListStr .= "$callingLocationName ($callingLocationTime) only.";
+                                                }
+                                                elseif ($callingPointIndex < count($json_callingPoints)) {
+                                                    if ($callingPointIndex == 1) {
+                                                        $callingAtListStr .= "$callingLocationName ($callingLocationTime)";
+                                                        $callingPointIndex++;
                                                     }
                                                     else {
-                                                        $callingAtListStr .= " and $callingLocationName ($callingLocationTime).";
+                                                        $callingAtListStr .= ", $callingLocationName ($callingLocationTime)";
+                                                        $callingPointIndex++;
                                                     }
                                                 }
+                                                else {
+                                                    $callingAtListStr .= " and $callingLocationName ($callingLocationTime).";
+                                                }
+                                            }
                                         }
 
-                                        echo $callingAtListStr;
-
-                                        ?>
-                                    </div>
-                                    <?php if ($json_length > 0 && $json_isCancelled == false) { echo "<div class='scrolling-text-item'>This train is made up of $json_length carriages.</div>"; }?>
+                                        echo "$callingAtListStr</div>";
+                                        
+                                        if ($json_length > 0 && $json_isCancelled == false) { echo "<div class='scrolling-text-item'>This train is made up of $json_length carriages.</div>"; }
+                                        
+                                    ?>
                                 </div>
                             </div>
                         </div>
