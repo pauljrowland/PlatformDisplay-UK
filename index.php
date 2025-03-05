@@ -246,34 +246,49 @@ if ($json_services == true) { //There are services of some sort
                                             foreach ($json_callingPoints as $json_calling_point) {
 
                                                 $callingLocationName = $json_calling_point->locationName;
-                                                if ($json_calling_point->et == "On time") {
+                                                if ($json_calling_point->et == "On time") { // Show the scheduled time as the train is on time
                                                     $callingLocationTime = $json_calling_point->st;
                                                 }
                                                 else{
-                                                    $callingLocationTime = $json_calling_point->et;
+                                                    $callingLocationTime = $json_calling_point->et; // Show the expected tme as the train is now late
                                                 }
 
-                                                if (count($json_callingPoints) == 1) {
-
+                                                if ((count($json_callingPoints) == 1) && $delayed == true) { // There is only 1 calling point and the train is late. Don't show ETA for each calling point as it may not be known.
+                                                    $callingAtListStr .= "$callingLocationName only.";
+                                                }
+                                                elseif ((count($json_callingPoints) == 1) && $delayed == false) { // There is only 1 calling point and the train is on time. Show scheduled times for each calling point.
                                                     $callingAtListStr .= "$callingLocationName ($callingLocationTime) only.";
                                                 }
-                                                elseif ($callingPointIndex < count($json_callingPoints)) {
-                                                    if ($callingPointIndex == 1) {
+                                                elseif (($callingPointIndex < count($json_callingPoints)) && $delayed == true) { // There is more than 1 calling point and the train is delayed. Don't show ETA for each calling point as it may not be known.
+                                                    if ($callingPointIndex == 1) { // This is the first callling point, start the sentence.
+                                                        $callingAtListStr .= "$callingLocationName";
+                                                        $callingPointIndex++;
+                                                    }
+                                                    else { // This is not the first calling point, continue the sentence (note comma and space)
+                                                        $callingAtListStr .= ", $callingLocationName";
+                                                        $callingPointIndex++;
+                                                    }
+                                                }
+                                                elseif (($callingPointIndex < count($json_callingPoints)) && $delayed == false) {  // There is more than 1 calling point and the train is on time. Show ETA for each calling point.
+                                                    if ($callingPointIndex == 1) { // This is the first callling point, start the sentence.
                                                         $callingAtListStr .= "$callingLocationName ($callingLocationTime)";
                                                         $callingPointIndex++;
                                                     }
-                                                    else {
+                                                    else { // This is not the first calling point, continue the sentence (note comma and space)
                                                         $callingAtListStr .= ", $callingLocationName ($callingLocationTime)";
                                                         $callingPointIndex++;
                                                     }
                                                 }
-                                                else {
+                                                elseif ($delayed == true) {  // Last calling point and the train is delayed. Don't show ETA.
+                                                    $callingAtListStr .= " and $callingLocationName.";
+                                                }
+                                                else {  // Last calling point and the train is on time. Show ETA.
                                                     $callingAtListStr .= " and $callingLocationName ($callingLocationTime).";
                                                 }
                                             }
                                         }
 
-                                        echo "$callingAtListStr</div>";
+                                        echo "$callingAtListStr\n\t\t\t\t\t\t\t\t\t\t</div>";
                                         
                                         if ($json_length > 0 && $json_isCancelled == false) { echo "<div class='scrolling-text-item'>This train is made up of $json_length carriages.</div>"; }
                                         
@@ -446,7 +461,7 @@ if ($json_services == true) { //There are services of some sort
     </div> <!-- End displayBoardInnerWrapper DIV -->
 </div> <!-- End displayBoardWrapper DIV -->
 
-<br /><br /><br /><br /><br />
+<br><br><br><br><br>
 
 <div id="footer">
     <p>
