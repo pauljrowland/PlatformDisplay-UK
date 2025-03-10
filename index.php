@@ -64,7 +64,7 @@ else {
 
 <?php
 
-$station = strtoupper($station);
+$station = strtoupper($station); // Station code needs to be in CAPS as the API is case sensitive.
 
 // API Query
 $apiUrl = "https://api1.raildata.org.uk/1010-live-departure-board-dep1_2/LDBWS/api/20220120/GetDepBoardWithDetails/$station";
@@ -458,8 +458,8 @@ if ($json_services == true) { //There are services of some sort
             </table>
         </div>
         <div id="clock">
-        <script src="/assets/clock.js" ></script>
-    </div>
+            <script src="/assets/clock.js" ></script>
+        </div>
     </div> <!-- End displayBoardInnerWrapper DIV -->
 </div> <!-- End displayBoardWrapper DIV -->
 
