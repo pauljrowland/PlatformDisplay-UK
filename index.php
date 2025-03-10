@@ -458,8 +458,8 @@ if ($json_services == true) { //There are services of some sort
             </table>
         </div>
         <div id="clock">
-        <script src="/assets/clock.js" ></script>
-    </div>
+            <script src="/assets/clock.js" ></script>
+        </div>
     </div> <!-- End displayBoardInnerWrapper DIV -->
 </div> <!-- End displayBoardWrapper DIV -->
 
