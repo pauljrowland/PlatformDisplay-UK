@@ -4,6 +4,6 @@ Make the contents as follows:
 
 ```php
 <?php
-    $apikey = "<Your RailData Marketplace API Key Here";
+    $apikey = "<Your RailData Marketplace API Key Here>";
 ?>
 ```
