@@ -4,7 +4,6 @@ Make the contents as follows:
 
 ```php
 <?php
-    $username = "<Your RTT API Username>";
-    $password = "<Your RTT API Password>";
+    $apikey = "<Your RailData Marketplace API Key Here";
 ?>
 ```
