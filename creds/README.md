@@ -1,4 +1,4 @@
-In this directory (creds), create a new PHP file called creds.php to enable connection to the RTT API
+In this directory (creds), create a new PHP file called creds.php to enable connection to the RailData Marketplace API
 
 Make the contents as follows:
 
