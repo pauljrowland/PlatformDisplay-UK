@@ -124,6 +124,7 @@ if ($json_services == true) { //There are services of some sort
         $json_std = $s_service->std ?? "Booked Departure Unknown"; //When should it leave (std = scheduled)?
         $json_etd = $s_service->etd ?? "-"; //When is it likely to leave (est = estimated)?
         if ($json_etd == "On time") {$json_etd = $s_service->std; } //Train is on time, so for maths - set the estimated time to be the same as the scheduled time.
+        $json_delayReason = $s_service->delayReason ?? false; //Whiy is it delayed?
         $json_length = $s_service->length ?? "Unknown length"; //Operator friendly name
         $json_origin = $s_service->origin[0]->locationName  ?? "Origin unkown"; //Where is it from?
         $json_callingPoints = $s_service->subsequentCallingPoints[0]->callingPoint ?? false; //"Where is is going (select 0 in the array)?"
@@ -240,6 +241,9 @@ if ($json_services == true) { //There are services of some sort
                                         else {
 
                                             echo "<div class='scrolling-text-item'>This is the $json_operator service from $json_origin.</div>";
+
+                                            if ($json_delayReason){echo "<div class='scrolling-text-item' style='color:red;'>$json_delayReason.</div>";}
+
                                             echo "\n\t\t\t\t\t\t\t\t\t\t<div class='scrolling-text-item'>\n";
                                             $callingPointIndex = 1;
                                             $callingAtListStr = "Calling at ";
@@ -286,11 +290,12 @@ if ($json_services == true) { //There are services of some sort
                                                     $callingAtListStr .= " and $callingLocationName ($callingLocationTime).";
                                                 }
                                             }
+
                                         }
 
                                         echo "$callingAtListStr\n\t\t\t\t\t\t\t\t\t\t</div>";
                                         
-                                        if ($json_length > 0 && $json_isCancelled == false) { echo "<div class='scrolling-text-item'>This train is made up of $json_length carriages.</div>"; }
+                                        if ($json_length > 0 && $json_isCancelled == false) { echo "<div class='scrolling-text-item'>This train is formed of $json_length carriages.</div>"; }
                                         
                                     ?>
                                 </div>
