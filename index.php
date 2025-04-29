@@ -116,65 +116,63 @@ if ($json_services == true) { //There are services of some sort
 
         $json_serviceID = $s_service->serviceID ?? "Identity Unknown"; //Train identity (head code)
         $json_destination = $s_service->destination[0]->locationName ?? "Destination Unknown"; //All train calling destinations
-        $json_isCancelled = $s_service->isCancelled ?? false;
-        $json_cancelReason = $s_service->cancelReason ?? false;
+        $json_isCancelled = $s_service->isCancelled ?? false; //Is the train cancelled?
+        $json_cancelReason = $s_service->cancelReason ?? false; //Why is the train cancelled?
         $json_platform = $s_service->platform ?? "-"; //Platform number. Set to "-" if unknown or a single platform station
         $json_operatorCode = $s_service->operatorCode ?? "Operator Code Unknown"; //Operator code, i.e. LD
         $json_operator = $s_service->operator ?? "Operator Name Unknown"; //Operator friendly name
-        $json_std = $s_service->std ?? "Booked Departure Unknown"; //When should it leave?
-        $json_etd = $s_service->etd ?? "-"; //When is it likely to leave?
-        if ($json_etd == "On time") {$json_etd = $s_service->std; }
+        $json_std = $s_service->std ?? "Booked Departure Unknown"; //When should it leave (std = scheduled)?
+        $json_etd = $s_service->etd ?? "-"; //When is it likely to leave (est = estimated)?
+        if ($json_etd == "On time") {$json_etd = $s_service->std; } //Train is on time, so for maths - set the estimated time to be the same as the scheduled time.
         $json_length = $s_service->length ?? "Unknown length"; //Operator friendly name
         $json_origin = $s_service->origin[0]->locationName  ?? "Origin unkown"; //Where is it from?
-        $json_callingPoints = $s_service->subsequentCallingPoints[0]->callingPoint ?? "Where is is going?";
+        $json_callingPoints = $s_service->subsequentCallingPoints[0]->callingPoint ?? false; //"Where is is going (select 0 in the array)?"
 
-                    $json_gbttBookedDepartureNextDay = $s_service->locationDetail->gbttBookedDepartureNextDay ?? false; //Next day departure
-                    //$json_realtimeArrivalActual = $s_service->locationDetail->std ?? false; //Has it arived?
+        $timezone = new DateTimeZone('Europe/London'); // Respect Europe/London as this is UK only.
+        // The inputs are in "H:i" format (e.g. "23:30", "01:15") - so assemble parts to add on the date (as this is not provided by the API)
+        $today = date('Y-m-d');
+        // Create datetime objects in Europe/London timezone
+        $stdDateTime = DateTime::createFromFormat('Y-m-d-H:i', "$today-$json_std", $timezone); //Scheduled date and time in Y-m-d-H:i format respecting Europe/London and DST etc.
+        $etdDateTime = DateTime::createFromFormat('Y-m-d H:i', "$today $json_etd", $timezone); //Expected date and time in Y-m-d-H:i format respecting Europe/London and DST etc.
+        $nowDateTime = new DateTime('now', $timezone); //Date and time now, in Y-m-d-H:i format respecting Europe/London and DST etc.
+        $stdTimestamp = $stdDateTime->getTimestamp(); //Scheduled date and time now as a timestamp
+        $etdTimestamp = $etdDateTime->getTimestamp(); //Estimated date and time now as a timestamp
+        $nowTimestamp = $nowDateTime->getTimestamp(); //Current date and time now as a timestamp
+        
+        // Differences in whole minutes
+        $diff_SchedActualMinutes = (string) round(abs($stdTimestamp - $etdTimestamp) / 60); //Difference between the scheduled and estimated (actual) time in whole minutes
+        $diff_NowAndExpectedMinutes = (string) round(abs($etdTimestamp - $nowTimestamp) / 60); //Difference between the time now and estimated (actual) time in whole minutes
+        $diff_SchedActual = (string) $diff_SchedActualMinutes; //Convert this to a string for display later
+        $diff_NowAndExpected = (string) $diff_NowAndExpectedMinutes; //Convert this to a string for display later
 
-        $stdDate = date("Y-m-d"); //Get today's date
-        $stdDate = "$stdDate-$json_std"; //Add on the scheduled time to the end of the date
-        $stdDateObj = date("Y-m-d H:i", strtotime($stdDate)); //Convert to date string
-        $etdDate = date("Y-m-d"); //Get today's date
-        $etdDate = "$etdDate $json_etd"; //Add on the expected time to the end of the date
-        $etdDateObj = date("Y-m-d H:i", strtotime($etdDate)); //Convert to date string
-        $nowDate = date("Y-m-d-H:i"); // Timestamp now
-        $nowDateObj = date("Y-m-d H:i", strtotime($nowDate)); //Convert the now timestamp to a date string too
-
-        if ($etdDateObj == true) { //There is an expected time - let's work out if it's delayed ot not.
-            
-            $diff_SchedActual = abs(strtotime($stdDateObj) - abs(strtotime($etdDateObj))); 
-            $diff_SchedActual= round($diff_SchedActual /60,2);//->format('%i');
-
-            $diff_NowAndExpected = abs(strtotime($etdDateObj) - abs(strtotime($nowDateObj)));
-            $diff_NowAndExpected = round($diff_NowAndExpected /60,2);//->format('%i');
-
-            if ($json_isCancelled == true){
-                $json_destination = "$json_destination";
-                $delayed = false; // Set delayed to false to prevent errors when a train is cancelled.
-            }
-            elseif ($diff_SchedActual > 0) { //The difference between scheduled and expected is greater than 0 - the train is late.
-                $delayed = true; //Set delayed to true
-                if (($showExpectedInfo == "true") || ($showExpectedInfo != "true" && $delayed == true)) { //The user has chosen to see this (as opposed to just flashing text). Add the delay onto the destination text.
-                    if ($json_etd == "Delayed") {
-                        $json_destination = "$json_destination    (Delayed)";
-                    }
-                    else
-                    {
-                        $json_destination = "$json_destination    (Exp: $json_etd)";
-                    }
+        if ($json_isCancelled == true){
+            $json_destination = "$json_destination";
+            $delayed = false; // Set delayed to false to prevent errors when a train is cancelled.
+        }
+        elseif ($diff_SchedActual > 0) { //The difference between scheduled and expected is greater than 0 - the train is late.
+            $delayed = true; //Set delayed to true
+            if (($showExpectedInfo == "true") || ($showExpectedInfo != "true" && $delayed == true)) { //The user has chosen to see this (as opposed to just flashing text). Add the delay onto the destination text.
+                if ($json_etd == "Delayed") {
+                    $json_destination = "$json_destination    (Delayed)";
+                }
+                else
+                {
+                    $json_destination = "$json_destination    (Exp: $json_etd)";
                 }
             }
-            else { //The train is on time
-                $delayed = false;
-                if ($showExpectedInfo == "true") { //The user has chosen to see this (as opposed to just green). Add that it is on time onto the destination text.
-                    $json_destination = "$json_destination    (On Time)";
-                }
+        }
+        else { //The train is on time
+            $delayed = false;
+            if ($showExpectedInfo == "true") { //The user has chosen to see this (as opposed to just green). Add that it is on time onto the destination text.
+                $json_destination = "$json_destination    (On Time)";
             }
-
         }
         
         if ($diff_NowAndExpected <= 0) { //The train is within 1 minute away, so may as well say it's Due
             $diff_NowAndExpected = "Due";
+        }
+        elseif ($diff_NowAndExpected < 0) {
+            $diff_NowAndExpected = "Delayed";
         }
         elseif ($json_etd == "Delayed") { // There is a delay - but unknown how long
             $diff_NowAndExpected = "No ETA";
