@@ -1,5 +1,9 @@
 <?php
 
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
 function refresh( $time ){
     $current_url = $_SERVER[ 'REQUEST_URI' ];
     return header( "Refresh: " . $time . "; URL=$current_url" );
@@ -137,17 +141,17 @@ if ($json_services == true) { //There are services of some sort
         $etdDateTime = DateTime::createFromFormat('Y-m-d H:i', "$today $json_etd", $timezone); //Expected date and time in Y-m-d-H:i format respecting Europe/London and DST etc.
         $nowDateTime = new DateTime('now', $timezone); //Date and time now, in Y-m-d-H:i format respecting Europe/London and DST etc.
         $stdTimestamp = $stdDateTime->getTimestamp(); //Scheduled date and time now as a timestamp
-        $etdTimestamp = $etdDateTime->getTimestamp(); //Estimated date and time now as a timestamp
+    	if ($json_isCancelled == true) {$etdDateTime = $stdDateTime;} // Train has been cancelled - so there no expected time. Set to scheduled time to prevent errors.
+    	$etdTimestamp = $etdDateTime->getTimestamp(); //Estimated date and time now as a timestamp
         $nowTimestamp = $nowDateTime->getTimestamp(); //Current date and time now as a timestamp
         
         // Differences in whole minutes
-        $diff_SchedActualMinutes = (string) ceil(abs($stdTimestamp - $etdTimestamp) / 60); //Difference between the scheduled and estimated (actual) time in whole minutes (ceil rounded up not down)
-        $diff_NowAndExpectedMinutes = (string) ceil(($etdTimestamp - $nowTimestamp) / 60); //Difference between the time now and estimated (actual) time in whole minutes (ceil rounded up not down)
+        $diff_SchedActualMinutes = (string) round(abs($stdTimestamp - $etdTimestamp) / 60); //Difference between the scheduled and estimated (actual) time in whole minutes
+        $diff_NowAndExpectedMinutes = (string) round(($etdTimestamp - $nowTimestamp) / 60); //Difference between the time now and estimated (actual) time in whole minutes
         $diff_SchedActual = (string) $diff_SchedActualMinutes; //Convert this to a string for display later
         $diff_NowAndExpected = (string) $diff_NowAndExpectedMinutes; //Convert this to a string for display later
 
         if ($json_isCancelled == true){
-            $json_destination = "$json_destination";
             $delayed = false; // Set delayed to false to prevent errors when a train is cancelled.
         }
         elseif ($diff_SchedActual > 0) { //The difference between scheduled and expected is greater than 0 - the train is late.
@@ -197,23 +201,25 @@ if ($json_services == true) { //There are services of some sort
 
 ?>
 
-        <script> //Switch the train identity and headcode
-            var texts = new Array();
-            /*texts.push("<?php echo $json_serviceID; ?>");*/
-            texts.push("<?php echo $json_std; ?>");
-            point = 0;
-            function changeText(){
-                if(point < ( texts.length - 1 ) ){
-                    point++;
-                }else{
-                    point = 0;
-                }
-                document.getElementById('nextTrainTime').innerHTML = texts[point];
-            }
-            setInterval(changeText, 5000); /*Call it here*/
-            changeText();
-        </script>
-        
+        <!--
+			<script> //Switch the train identity and headcode
+      	    	var texts = new Array();
+            	texts.push("<?php echo $json_serviceID; ?>");
+            	texts.push("<?php echo $json_std; ?>");
+            	point = 0;
+            	function changeText(){
+                	if(point < ( texts.length - 1 ) ){
+                    	point++;
+                	}else{
+                    	point = 0;
+                	}
+                	document.getElementById('nextTrainTime').innerHTML = texts[point];
+            	}
+            	setInterval(changeText, 3000); /*Call it here*/
+            	changeText();
+        	</script>
+		-->
+            
         <div class='board-top'>
             <table>
                 <tr>
@@ -224,14 +230,6 @@ if ($json_services == true) { //There are services of some sort
                 </tr>
             </table>
         </div>
-        <script>
-            window.onload = function() {
-    var scrollText = document.querySelector('.scrolling-text');
-    var textLength = scrollText.innerText.length;
-    var speed = Math.max(20, 45 - (textLength / 20)); // Adjust the formula for fine-tuning speed
-    document.documentElement.style.setProperty('--marquee-speed', `${speed}s`);
-};</script>
-
         <div class='board-middle'>
             <table>
                 <tr id='board-middle-table-row'>
@@ -241,59 +239,70 @@ if ($json_services == true) { //There are services of some sort
                             <div class="scrolling-text-inner" id="scroll" role="marquee">
                                 <div class="scrolling-text">
                                     <?php 
+
                                         if ($json_isCancelled == true){
                                             $callingAtListStr = "<div class=\"scrolling-text-item\">We are sorry to announce that the $json_operator service to $json_destination has been cancelled.</div>";
-                                            $callingAtListStr .= "<div class=\"scrolling-text-item\">$json_cancelReason.</div>";
+                                            $callingAtListStr .= "<div class=\"scrolling-text-item\">$json_cancelReason.";
                                         }
                                         else {
-                                            $callingAtListStr = "<div class='scrolling-text-item'>This is the $json_operator service from $json_origin.</div>";
 
-                                            if ($json_delayReason){
-                                                $callingAtListStr .= "<div class='scrolling-text-item' style='color:red;'>$json_delayReason.</div>";
-                                            }
+                                            echo "<div class='scrolling-text-item'>This is the <span style='color:lightblue;'>$json_operator</span> service from $json_origin.</div>";
 
-                                            $callingAtListStr .= "<div class='scrolling-text-item'>\n";
+                                            if ($json_delayReason){echo "\n\t\t\t\t\t\t\t\t\t<div class='scrolling-text-item' style='color:red;'>$json_delayReason.</div>";}
 
-                                            $totalCallingPoints = count($json_callingPoints); // Calculate once outside the loop
-                                            $callingAtListStr .= "Calling at ";
-
-                                            foreach ($json_callingPoints as $index => $json_calling_point) {
+                                            echo "\n\t\t\t\t\t\t\t\t\t<div class='scrolling-text-item'>";
+                                            $callingPointIndex = 1;
+                                            $callingAtListStr = "Calling at ";
+                                            foreach ($json_callingPoints as $json_calling_point) {
 
                                                 $callingLocationName = $json_calling_point->locationName;
-                                                $callingLocationTime = ($json_calling_point->et == "On time") ? $json_calling_point->st : $json_calling_point->et;
+                                                if ($json_calling_point->et == "On time") { // Show the scheduled time as the train is on time
+                                                    $callingLocationTime = $json_calling_point->st;
+                                                }
+                                                else{
+                                                    $callingLocationTime = $json_calling_point->et; // Show the expected tme as the train is now late
+                                                }
 
-                                                if ($totalCallingPoints == 1 && $delayed == true) {
-                                                    // Only 1 calling point and delayed
-                                                    $callingAtListStr .= "$callingLocationName only.</div>";
+                                                if ((count($json_callingPoints) == 1) && $delayed == true) { // There is only 1 calling point and the train is late. Don't show ETA for each calling point as it may not be known.
+                                                    $callingAtListStr .= "$callingLocationName only.";
                                                 }
-                                                elseif ($totalCallingPoints == 1 && $delayed == false) {
-                                                    // Only 1 calling point and on time
-                                                    $callingAtListStr .= "$callingLocationName ($callingLocationTime) only.</div>";
+                                                elseif ((count($json_callingPoints) == 1) && $delayed == false) { // There is only 1 calling point and the train is on time. Show scheduled times for each calling point.
+                                                    $callingAtListStr .= "$callingLocationName ($callingLocationTime) only.";
                                                 }
-                                                elseif ($index < $totalCallingPoints - 1 && $delayed == true) {
-                                                    // More than 1 calling point and delayed
-                                                    $callingAtListStr .= ($index == 0) ? "$callingLocationName" : ", $callingLocationName";
+                                                elseif (($callingPointIndex < count($json_callingPoints)) && $delayed == true) { // There is more than 1 calling point and the train is delayed. Don't show ETA for each calling point as it may not be known.
+                                                    if ($callingPointIndex == 1) { // This is the first callling point, start the sentence.
+                                                        $callingAtListStr .= "$callingLocationName";
+                                                        $callingPointIndex++;
+                                                    }
+                                                    else { // This is not the first calling point, continue the sentence (note comma and space)
+                                                        $callingAtListStr .= ", $callingLocationName";
+                                                        $callingPointIndex++;
+                                                    }
                                                 }
-                                                elseif ($index < $totalCallingPoints - 1 && $delayed == false) {
-                                                    // More than 1 calling point and on time
-                                                    $callingAtListStr .= ($index == 0) ? "$callingLocationName ($callingLocationTime)" : ", $callingLocationName ($callingLocationTime)";
+                                                elseif (($callingPointIndex < count($json_callingPoints)) && $delayed == false) {  // There is more than 1 calling point and the train is on time. Show ETA for each calling point.
+                                                    if ($callingPointIndex == 1) { // This is the first callling point, start the sentence.
+                                                        $callingAtListStr .= "$callingLocationName ($callingLocationTime)";
+                                                        $callingPointIndex++;
+                                                    }
+                                                    else { // This is not the first calling point, continue the sentence (note comma and space)
+                                                        $callingAtListStr .= ", $callingLocationName ($callingLocationTime)";
+                                                        $callingPointIndex++;
+                                                    }
                                                 }
-                                                elseif ($index == $totalCallingPoints - 1 && $delayed == true) {
-                                                    // Last calling point and delayed
-                                                    $callingAtListStr .= " and $callingLocationName.</div>";
+                                                elseif ($delayed == true) {  // Last calling point and the train is delayed. Don't show ETA.
+                                                    $callingAtListStr .= " and $callingLocationName.";
                                                 }
-                                                else {
-                                                    // Last calling point and on time
-                                                    $callingAtListStr .= " and $callingLocationName ($callingLocationTime).</div>";
+                                                else {  // Last calling point and the train is on time. Show ETA.
+                                                    $callingAtListStr .= " and $callingLocationName ($callingLocationTime).";
                                                 }
                                             }
+
                                         }
 
-                                        if ($json_length > 0 && $json_isCancelled == false) {
-                                            $callingAtListStr .= "<div class='scrolling-text-item'>This train is formed of $json_length carriages.</div>";
-                                        }
-
-                                        echo $callingAtListStr;
+                                        echo "$callingAtListStr</div>\n";
+                                        
+                                        if ($json_length > 0 && $json_isCancelled == false) { echo "\n\t\t\t\t\t\t\t\t\t<div class='scrolling-text-item'>This train is formed of $json_length carriages.</div>"; }
+                                        
                                     ?>
                                 </div>
                             </div>
@@ -302,7 +311,6 @@ if ($json_services == true) { //There are services of some sort
                 </tr>
             </table>
         </div>
-
  <?php
                 
         }
@@ -339,7 +347,6 @@ if ($json_services == true) { //There are services of some sort
         $diff_NowAndExpected = false;
         $diff_SchedActual= false;
 ?>
-
         <div class='board-top'>
             <table>
                 <tr>
@@ -347,7 +354,6 @@ if ($json_services == true) { //There are services of some sort
                 </tr>
             </table>
         </div>
-        
         <div class='board-middle'>
             <table>
                 <tr id='board-middle-table-row'>
@@ -380,27 +386,22 @@ if ($json_services == true) { //There are services of some sort
                 </tr>
             </table>
         </div>
-                       
-
 <?php
 
 } // End if services
 
 ?>
-
-        <div class='board-bottom'>
+		<div class='board-bottom'>
             <table>
                 <tr>
                     <td id="boardBottomText">
-                        <!--<span id="bottomRow"></span>-->
-
                         <div id="wordContainer">
                             <?php
                                 if ($json_name) { //If the station is valid
-                                    echo "<table class='nextTrainsTableStaticText'><tr><td>$json_name</td></tr></table>";
+                                    echo "<table class='nextTrainsTableStaticText'><tr><td>$json_name</td></tr></table>\n";
                                 }
                                 else {
-                                    echo "<table class='nextTrainsTableStaticText'><tr><td>Invalid Station Code: '$station'</td></tr></table>";
+                                    echo "<table class='nextTrainsTableStaticText'><tr><td>Invalid Station Code: '$station'</td></tr></table>\n";
                                 }
                             ?>
                         </div> 
