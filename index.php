@@ -434,8 +434,10 @@ if ($json_services == true) { //There are services of some sort
 
                         }
                       
-                        $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>Please ensure that you do not leave personal</td></tr></table>\",";
-                        $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>belongings unattended.</td></tr></table>\",";
+                        $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>Please do not leave personal belongings unattended.</td></tr></table>\",";
+                        $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>If you see something that doesn't look right, speak to</td></tr></table>\",";
+                        $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>staff, or text the British Transport Police on 60016 and</td></tr></table>\",";
+                        $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>we'll sort it. See it. Say it. Sorted!</td></tr></table>\",";
                         $btmScrItems[] = "\"<table class='nextTrainsTableStaticText'><tr><td>&nbsp;</td></tr></table>\",";
 ?>
 
