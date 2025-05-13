@@ -129,8 +129,9 @@ if ($json_services == true) { //There are services of some sort
         $json_operatorCode = $s_service->operatorCode ?? "Operator Code Unknown"; //Operator code, i.e. LD
         $json_operator = $s_service->operator ?? "Operator Name Unknown"; //Operator friendly name
         $json_std = $s_service->std ?? "Booked Departure Unknown"; //When should it leave (std = scheduled)?
-        $json_etd = $s_service->etd ?? "-"; //When is it likely to leave (est = estimated)?
+        $json_etd = $s_service->etd ?? false; //When is it likely to leave (est = estimated)?
         if ($json_etd == "On time") {$json_etd = $s_service->std; } //Train is on time, so for maths - set the estimated time to be the same as the scheduled time.
+        if ($json_etd == false) {$json_etd = $s_service->std; } //No etd, set to std to prevent error
         $json_delayReason = $s_service->delayReason ?? false; //Whiy is it delayed?
         $json_length = $s_service->length ?? "Unknown length"; //Operator friendly name
         $json_origin = $s_service->origin[0]->locationName  ?? "Origin unkown"; //Where is it from?
