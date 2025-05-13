@@ -18,7 +18,7 @@ body {
 #displayBoardWrapper {
     display: block;
     width:75%;
-    min-width: 1024px; /* Set at this as "Rhoose Cardiff International Airport" is the longest station name (that's not Llanfair: */
+    min-width: 1275px; /* Set at this as "Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch" is the longest station name. */
     background-color: silver;
     margin: auto;
     padding:10px;

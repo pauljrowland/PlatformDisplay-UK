@@ -56,7 +56,7 @@ else {
 
 ?>
 
-<a href="?station=ncl<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">NCL</a> - <a href="?station=kgx<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">KGX</a> - <a href="?station=asl<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">ASL</a> - <a href="?station=nwh<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">NWH</a> - <a href="?station=car<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">CAR</a> - <a href="?station=sun<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">SUN</a> - <a href="?station=nlw<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">NLW</a> - <a href="?station=zzz<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">ZZZ</a><br><br>
+<a href="?station=ncl<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">NCL</a> - <a href="?station=kgx<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">KGX</a> - <a href="?station=asl<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">ASL</a> - <a href="?station=nwh<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">NWH</a> - <a href="?station=car<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">CAR</a> - <a href="?station=sun<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">SUN</a> - <a href="?station=nlw<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">NLW</a> - <a href="?station=lpg<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">LPG</a> - <a href="?station=zzz<?php if ($showExpectedInfo == true) { echo "&showexpected=true";} ?>">ZZZ</a><br><br>
 <form action=".">
     Manual Station Code: <input name="station" id="station" type="text" required value="<?php echo $station;?>" aria-label="StationCode"><br>
     Platform Number (leave blank for all): <input name="platform" id="platform" type="text" value="<?php echo $platform;?>" aria-label="Platform"><br>
@@ -87,6 +87,9 @@ $obj = json_decode($json); //Store PHP JSON as object
 
 $json_name = $obj->locationName ?? false; // Station Name
 $json_crs = $obj->crs ?? false; //Station Code
+
+if ($json_crs == "LPG") {$json_name = "Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch";}
+
 $json_services = $obj->trainServices ?? false; //Services
 
 ?>
